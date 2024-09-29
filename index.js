@@ -23,6 +23,8 @@ app.use(apiRouter);
 const server = http.createServer(app);
 
 server.on("upgrade", (request, socket, head) => {
+  console.log("is it checking for sockets");
+  console.log("request.url", request.url);
   if (request.url.includes("callStreaming")) {
     const call_sid = new URL(request.url, `http://${request.headers.host}`).searchParams.get("call_sid");
     console.log("handle call streaming web socket", call_sid);
@@ -41,6 +43,7 @@ server.on("upgrade", (request, socket, head) => {
       webSocketServers[uniqueId].emit("connection", ws, request);
     });
   } else {
+    console.log("nothing condition is matched so now closing the socket");
     socket.destroy();
   }
 });

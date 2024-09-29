@@ -1,8 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
+require("dotenv").config();
 const app = express();
-const port = 3002;
+const port = process.env.PORT || 3002;
+// const port = 3002;
 const { webSocketServers, callSocketServers } = require("./controllers"); // Import webSocketServers
 
 app.use(

@@ -48,8 +48,6 @@ server.on("upgrade", (request, socket, head) => {
   }
 });
 
-
-
 server.listen(port, () => {
   console.log(`server logs checking 1`);
   console.log(`Server is running at http://localhost:${port}`);

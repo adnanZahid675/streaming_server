@@ -36,7 +36,7 @@ const getCallStreaming = (req, res) => {
   });
   console.log("\n\nreq.headers.host", req.baseUrl);
 
-  const wsUrl = `ws://${req.baseUrl}/callStreaming?call_sid=${conf_sid}`;
+  const wsUrl = `ws://${req.headers.host}/callStreaming?call_sid=${conf_sid}`;
   res.json({ message: "WebSocket server for call has created", url: wsUrl });
 };
 

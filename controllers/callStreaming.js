@@ -14,21 +14,20 @@ const getCallStreaming = (req, res) => {
   callSocketServers[conf_sid] = callSocket;
 
   callSocketServers[conf_sid].on("connection", (ws) => {
+    console.log("\n\n\n\nconnection created");
+
     ws.on("message", (message) => {
       console.log(`Received message: ${message}`);
       ws.send(`Server response: ${message}`);
     });
-
     ws.on("close", () => {
       console.log("Client disconnected");
     });
-
     ws.on("error", (error) => {
       console.error(`WebSocket error: ${error}`);
     });
   });
 
-  // Check if the incoming request is secure (HTTPS) to decide between ws or wss
   const wsUrl = `wss://${req.headers.host}/callStreaming?call_sid=${conf_sid}`;
 
   res.json({

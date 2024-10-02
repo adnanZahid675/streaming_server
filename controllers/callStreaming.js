@@ -17,7 +17,12 @@ const getCallStreaming = (req, res) => {
     console.log("\n\n\n\nconnection created");
 
     ws.on("message", (message) => {
-      console.log(`Received message: ${message}`);
+      const data = JSON.parse(message); // Parsing the incoming message
+      console.count("message");
+      if (data.event === "dtmf") {
+        console.log("Received DTMF digit:", data); // Logging the pressed digit
+        console.log("Received DTMF digit:", data.digit); // Logging the pressed digit
+      }
       ws.send(`Server response: ${message}`);
     });
     ws.on("close", () => {

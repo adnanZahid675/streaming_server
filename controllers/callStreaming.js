@@ -18,7 +18,8 @@ const getCallStreaming = (req, res) => {
 
     ws.on("message", (message) => {
       const data = JSON.parse(message); // Parsing the incoming message
-      console.log("event", data.event);
+      console.log("data?.media", data?.media);
+
       if (data.event === "dtmf") {
         console.log("dtmf Received DTMF digit:", data); // Logging the pressed digit
         console.log("Received DTMF digit:", data.digit); // Logging the pressed digit

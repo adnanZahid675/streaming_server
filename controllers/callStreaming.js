@@ -20,19 +20,16 @@ const getCallStreaming = (req, res) => {
       const data = JSON.parse(message); // Parsing the incoming message
       console.log("data?.event", data?.event);
 
-      if (data.event === "Connected") {
+      if (data.event === "connected") {
         console.log("Connected now:", data); // Logging the pressed digit
       }
-      if (data.event === "Start") {
+      if (data.event === "start") {
         console.log("Started now:", data); // Logging the pressed digit
       }
-      if (data.event === "Media") {
-        console.log("Event media"); // Logging the pressed digit
-      }
-      if (data.event === "DTMF") {
+      if (data.event === "dtmf") {
         console.log("dtmf Received DTMF digit:", data); // Logging the pressed digit
       }
-      if (data.event === "Stop") {
+      if (data.event === "stop") {
         console.log("Call stopped"); // Logging the pressed digit
       }
       ws.send(`Server response: ${message}`);

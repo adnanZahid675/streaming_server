@@ -18,6 +18,8 @@ const getCallStreaming = (req, res) => {
 
     ws.on("message", (message) => {
       const data = JSON.parse(message); // Parsing the incoming message
+      console.log("data?.event", data?.event);
+
       if (data.event === "Connected") {
         console.log("Connected now:", data); // Logging the pressed digit
       }

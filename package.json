@@ -1,5 +1,5 @@
 {
-  "name": "Streaming_to_Web",
+  "name": "streaming-to-web",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@signalwire/realtime-api": "^3.13.0",
+    "axios": "^1.7.7",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",

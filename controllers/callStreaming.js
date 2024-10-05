@@ -70,7 +70,6 @@ const getCallStreaming = (req, res) => {
   callSocketServers[conf_sid] = callSocket;
 
   callSocketServers[conf_sid].on("connection", (ws) => {
-    console.log("\n\n\n\nconnection created");
 
     ws.on("message", async (message) => {
       const data = JSON.parse(message); // Parsing the incoming message

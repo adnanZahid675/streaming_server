@@ -61,6 +61,8 @@ const axios = require("axios");
 const getCallStreaming = (req, res) => {
   const conf_sid = req?.query?.conf_sid;
 
+  console.log("\nconf_sid: ", conf_sid);
+
   if (!conf_sid) {
     res.status(400).json({ message: "Conference sid not found" });
     return;
@@ -70,6 +72,7 @@ const getCallStreaming = (req, res) => {
   callSocketServers[conf_sid] = callSocket;
 
   callSocketServers[conf_sid].on("connection", (ws) => {
+    console.log("\n\n\n\nconnection has created");
 
     ws.on("message", async (message) => {
       const data = JSON.parse(message); // Parsing the incoming message

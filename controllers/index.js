@@ -8,6 +8,7 @@ const {
   getCallStreaming,
   callSocketServers,
   checkDigits,
+  getConferenceStreaming
 } = require("./callStreaming");
 
 module.exports = {
@@ -18,4 +19,5 @@ module.exports = {
   getCallStreaming,
   callSocketServers,
   checkDigits,
+  getConferenceStreaming
 };

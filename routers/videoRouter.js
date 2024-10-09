@@ -6,6 +6,7 @@ const {
   closeAllSockets,
   getCallStreaming,
   checkDigits,
+  getConferenceStreaming,
 } = require("../controllers");
 // const { getCallStreaming } = require("../controllers/callStreaming");
 
@@ -13,6 +14,7 @@ const {
 router.get("/record-list", getVideoCTRL);
 router.get("/streaming", getStreaming);
 router.get("/callStreaming", getCallStreaming);
+router.get("/conference", getConferenceStreaming);
 router.get("/checkDigits", checkDigits);
 router.get("/closeAllSockets", closeAllSockets);
 

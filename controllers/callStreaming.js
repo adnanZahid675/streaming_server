@@ -127,4 +127,4 @@ async function sendPostRequestWithDigits(digit) {
   }
 }
 
-module.exports = { getCallStreaming, callSocketServers,checkDigits };
+module.exports = { getCallStreaming, callSocketServers, checkDigits };

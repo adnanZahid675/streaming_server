@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@signalwire/node": "^2.6.0",
     "@signalwire/realtime-api": "^3.13.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",

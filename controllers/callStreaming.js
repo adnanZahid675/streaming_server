@@ -5,6 +5,104 @@ let callSocketServers = {};
 let callResult = {};
 const axios = require("axios");
 
+const { RelayConsumer } = require("@signalwire/node");
+
+// const consumer = new RelayConsumer({
+//   project: "93d5b1c7-b843-49e8-be85-b9882c51524d", // Replace with your project ID
+//   token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094", // Replace with your API token
+//   contexts: ["office"], // Contexts to listen for inbound calls
+//   onIncomingCall: async (call) => {
+//     try {
+//       console.log("Incoming call from: ", call.from);
+
+//       // Answer the incoming call
+//       await call.answer();
+
+//       // Add the incoming call to a conference
+//       const conference = await call?.client?.conference({
+//         name: "Conference1", // Name your conference
+//         from: call.from,
+//       });
+
+//       // Add the incoming call to the conference
+//       await call.join(conference);
+
+//       console.log("Call joined the conference");
+//     } catch (error) {
+//       console.error("Error handling the call: ", error);
+//     }
+//   },
+// });
+
+// consumer.run();
+
+const consumer = new RelayConsumer({
+  project: '93d5b1c7-b843-49e8-be85-b9882c51524d',
+  token: 'PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094',
+  contexts: ['office'],
+  ready: async ({ client }) => {
+    console.log('Client is ready!');
+
+    // Initialize calling if necessary (some setups might require this).
+    const calling = client.calling;
+    if (!calling) {
+      console.error("Calling capabilities not initialized.");
+      return;
+    }
+
+    // Create a new conference
+    // const conferenceName = 'my-conference';
+    // try {
+    //   const conference = await client.calling.conferences.create({
+    //     name: conferenceName,
+    //     status: "in-progress",
+    //   });
+    //   console.log(`Conference created: ${conference.sid}`);
+    // } catch (error) {
+    //   console.error("Error creating conference:", error);
+    // }
+  },
+  onIncomingCall: async (call) => {
+    console.log(`Incoming call: ${call.id}`);
+    const { successful } = await call.answer();
+    if (!successful) return;
+
+    // Add participant logic here if needed.
+  }
+});
+
+consumer.run();
+
+const dialAndAddToConference = async (req, res) => {
+  try {
+    const { from, to } = req?.query;
+    if (!from || !to) {
+      res.status(400).json({ message: "Query params are not completed" });
+      return;
+    } else {
+      console.log("all querry params from to \n", from, to);
+    }
+
+    const dialedCall = await consumer.client.calling.dial({
+      type: "phone",
+      to: `+${to}`, // Replace with the destination number
+      from: `+${from}`, // Replace with your SignalWire number
+    });
+
+    console.log("dialedCall", dialedCall);
+
+    if (dialedCall) {
+      const conference = await dialedCall?.client?.conference({
+        name: "Conference1", // Same conference as the one created earlier
+        from: dialedCall.from,
+      });
+      await dialedCall?.join(conference);
+    }
+  } catch (error) {
+    console.error("Error making the call:", error);
+  }
+};
+
 const getConferenceStreaming = async (req, res) => {
   const { from, to, conferenceName } = req?.query;
   if (!from || !to || !conferenceName) {
@@ -14,56 +112,52 @@ const getConferenceStreaming = async (req, res) => {
     console.log("all querry params from to \n", from, to);
   }
 
+  res.status(200).json({ message: "Processing your request" });
+  const client = new Voice.Client({
+    project: "93d5b1c7-b843-49e8-be85-b9882c51524d",
+    token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
+    topics: ["office"],
+  });
+
+  const call = await client.dialPhone({
+    from: `+${from}`,
+    to: `+${to}`,
+  });
+
+  const conference = await call?.client?.conference({
+    name: conferenceName,
+    from: call.from,
+  });
+  await call.join(conference);
+
+  call.on("collect.started", (collect) => {
+    console.log("collect.started", collect);
+  });
+  call.on("collect.startOfInput", (collect) => {
+    console.log("Input collection started.");
+  });
+  call.on("collect.updated", (collect) => {
+    console.log("collect.updated", collect.digits);
+  });
+  call.on("collect.ended", (collect) => {
+    console.log("collect.ended", collect.digits);
+    callResult[requestId] = collect.digits;
+  });
+  call.on("collect.failed", (collect) => {
+    console.log("collect.failed", collect.reason);
+  });
+  const collect = await call.collect({
+    digits: {
+      max: 10,
+      digitTimeout: 5,
+      terminators: "#*",
+    },
+  });
+  const { digits } = await collect.ended();
   try {
-    res.status(200).json({ message: "Processing your request" });
-    const client = new Voice.Client({
-      project: "93d5b1c7-b843-49e8-be85-b9882c51524d",
-      token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
-      topics: ["office"],
-    });
-
-    console.log("\n\nclient", client);
-
-    const requestId = uuidv4();
-
-    const call = await client.dialPhone({
-      from: `+${from}`,
-      to: `+${to}`,
-    });
-
-    const conference = await call.client.conference({
-      name: conferenceName, // Same conference as the one created earlier
-      from: call.from,
-    });
-
-    await call.join(conference);
-
-    call.on("collect.started", (collect) => {
-      console.log("collect.started", collect);
-    });
-    call.on("collect.startOfInput", (collect) => {
-      console.log("Input collection started.");
-    });
-    call.on("collect.updated", (collect) => {
-      console.log("collect.updated", collect.digits);
-    });
-    call.on("collect.ended", (collect) => {
-      console.log("collect.ended", collect.digits);
-      callResult[requestId] = collect.digits;
-    });
-    call.on("collect.failed", (collect) => {
-      console.log("collect.failed", collect.reason);
-    });
-    const collect = await call.collect({
-      digits: {
-        max: 10,
-        digitTimeout: 5,
-        terminators: "#*",
-      },
-    });
-    const { digits } = await collect.ended();
   } catch (error) {
     console.log("\ngot error in catch section", JSON.stringify(error));
+
     return;
   }
 };
@@ -139,4 +233,5 @@ module.exports = {
   callSocketServers,
   checkDigits,
   getConferenceStreaming,
+  dialAndAddToConference,
 };

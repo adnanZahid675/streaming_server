@@ -120,72 +120,77 @@ const getConferenceStreaming = async (req, res) => {
     console.log("\nall querry params from to \n", from, to);
   }
 
-  
   const client = new Voice.Client({
     project: "93d5b1c7-b843-49e8-be85-b9882c51524d",
     token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
     topics: ["office"],
   });
   res.status(200).json({ message: "Processing your request" });
-try {
-  
-  const call = await client.dialPhone({
-    from: `${from}`,
-    to: `${to}`,
-  });
-
-  console.log("call", call);
-  console.log("call voptions", call?.options?.payload?.call_id);
-
-  call.on("call.state", (newState) => {
-    if (newState === "ended") {
-      console.log("Call has ended.");
-    }
-  });
-
-  // const conference = await call?.client?.conference({
-  //   name: conferenceName,
-  //   from: call.from,
-  // });
-  // await call.join(conference);
-
-  let collectDigits = await call.collect({
-    digits: {
-      max: 10,
-      digitTimeout: 3,
-      terminators: "#*",
-    },
-  });
-
-  call.on("collect.started", (collect) => {
-    console.log("\n\n\ncollect.started", collect);
-  });
-  call.on("collect.startOfInput", (collect) => {
-    console.log("\n\n\nInput collection started.");
-  });
-  call.on("collect.updated", (collect) => {
-    console.log("\n\n\ncollect.updated", collect.digits);
-  });
-  call.on("collect.ended", async (collect) => {
-    console.log("\n\n\ncollect.ended", collect.digits);
-    await call.playTTS({
-      text: "Please enter the number ",
+  try {
+    const call = await client.dialPhone({
+      from: `${from}`,
+      to: `${to}`,
     });
-    collectDigits = await call.collect({
+
+    console.log("call", call);
+    console.log("call voptions", call?.options?.payload?.call_id);
+
+    if (call?.options?.payload?.call_id) {
+      sendPostRequestWithOnCall(
+        call?.options?.payload?.call_id,
+        conferenceName,
+        from,
+        to
+      );
+    }
+    call.on("call.state", (newState) => {
+      if (newState === "ended") {
+        console.log("Call has ended.");
+      }
+    });
+
+    // const conference = await call?.client?.conference({
+    //   name: conferenceName,
+    //   from: call.from,
+    // });
+    // await call.join(conference);
+
+    let collectDigits = await call.collect({
       digits: {
         max: 10,
         digitTimeout: 3,
         terminators: "#*",
       },
     });
-  });
-  call.on("collect.failed", (collect) => {
-    console.log("\n\n\ncollect.failed", collect.reason);
-  });
-} catch (error) {
-  console.log("\n\n\n\ngot error in catch section ",error);
-  
-}
+
+    call.on("collect.started", (collect) => {
+      console.log("\n\n\ncollect.started", collect);
+    });
+    call.on("collect.startOfInput", (collect) => {
+      console.log("\n\n\nInput collection started.");
+    });
+    call.on("collect.updated", (collect) => {
+      console.log("\n\n\ncollect.updated", collect.digits);
+    });
+    call.on("collect.ended", async (collect) => {
+      console.log("\n\n\ncollect.ended", collect.digits);
+      await call.playTTS({
+        text: "Please enter the number ",
+      });
+      collectDigits = await call.collect({
+        digits: {
+          max: 10,
+          digitTimeout: 3,
+          terminators: "#*",
+        },
+      });
+    });
+    call.on("collect.failed", (collect) => {
+      console.log("\n\n\ncollect.failed", collect.reason);
+    });
+  } catch (error) {
+    console.log("\n\n\n\ngot error in catch section ", error);
+  }
   // const { digits } = await collectDigits.ended();
   // console.log("digits: ", digits);
 };
@@ -224,7 +229,9 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data); // Logging the pressed digit
       }
       if (data.event === "dtmf") {
-        await sendPostRequestWithDigits(data?.dtmf.digit);
+        console.log("\n\n\n\n\n\n\n\n\n\ndtmf event got: ", data);
+
+        // await sendPostRequestWithDigits(data?.dtmf.digit);
       }
       if (data.event === "stop") {
         console.log("Call stopped"); // Logging the pressed digit
@@ -245,11 +252,26 @@ const getCallStreaming = (req, res) => {
   });
 };
 
-async function sendPostRequestWithDigits(digit) {
+async function sendPostRequestWithOnCall(
+  call_sid,
+  conferenceName,
+  from,
+  to,
+  callId
+) {
   try {
-    const response = await axios.post("https://your-api-url.com/endpoint", {
-      Digits: digit,
-    });
+    console.log("sending request now : ", call_sid, conferenceName, from, to);
+
+    let payload = {
+      conferenceName,
+      call_sid,
+      from,
+      to,
+    };
+    const response = await axios.post(
+      "https://invisibletest.myagecam.net/invisible/signalwire_call/add_call_conference.php",
+      payload
+    );
   } catch (error) {
     console.error("Error sending axios POST request:", error);
   }

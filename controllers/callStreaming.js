@@ -101,29 +101,34 @@ const dialAndAddToConference = async (req, res) => {
     console.error("Error making the call:", error);
   }
 };
+request = 0;
 
 const getConferenceStreaming = async (req, res) => {
-  const { from, to, conferenceName } = req?.body;
-  if (!from || !to) {
-    res
-      .status(400)
-      .json({
-        message: `${!from ? "From number is required" : " "} ${
-          !to && "to number is required"
-        }`,
-      });
+  console.log("\n\nrequest call log", request++);
+
+  const { from, to, call_sid, conferenceName } = req?.body;
+  if (!from || !to || !conferenceName || call_sid) {
+    res.status(400).json({
+      message: `${!from ? "From number is required" : " "} 
+        ${!to ? "to number is required" : ""}
+        ${!call_sid ? "Call sid is required" : ""}
+        ${!conferenceName ? "Conference name is required" : ""}
+          `,
+    });
     return;
   } else {
-    console.log("all querry params from to \n", from, to);
+    console.log("\nall querry params from to \n", from, to);
   }
 
-  res.status(200).json({ message: "Processing your request" });
+  
   const client = new Voice.Client({
     project: "93d5b1c7-b843-49e8-be85-b9882c51524d",
     token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
     topics: ["office"],
   });
-
+  res.status(200).json({ message: "Processing your request" });
+try {
+  
   const call = await client.dialPhone({
     from: `${from}`,
     to: `${to}`,
@@ -177,6 +182,10 @@ const getConferenceStreaming = async (req, res) => {
   call.on("collect.failed", (collect) => {
     console.log("\n\n\ncollect.failed", collect.reason);
   });
+} catch (error) {
+  console.log("\n\n\n\ngot error in catch section ",error);
+  
+}
   // const { digits } = await collectDigits.ended();
   // console.log("digits: ", digits);
 };

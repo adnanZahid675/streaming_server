@@ -109,10 +109,11 @@ const getConferenceStreaming = async (req, res) => {
   const { from, to, call_sid, conferenceName } = req?.body;
   if (!from || !to || !conferenceName || call_sid) {
     res.status(400).json({
-      message: `${!from ? "From number is required" : " "} 
-        ${!to ? "to number is required" : ""}
-        ${!call_sid ? "Call sid is required" : ""}
-        ${!conferenceName ? "Conference name is required" : ""}
+      message: `${!from ? "From number is required" : " "} ${
+        !to ? "to number is required" : ""
+      }${!call_sid ? "Call sid is required" : ""}${
+        !conferenceName ? "Conference name is required" : ""
+      }
           `,
     });
     return;
@@ -140,7 +141,8 @@ const getConferenceStreaming = async (req, res) => {
         call?.options?.payload?.call_id,
         conferenceName,
         from,
-        to
+        to,
+        call_sid
       );
     }
     call.on("call.state", (newState) => {
@@ -206,9 +208,7 @@ const checkDigits = (req, res) => {
 
 const getCallStreaming = (req, res) => {
   const conf_sid = req?.query?.conf_sid;
-
   console.log("\nconf_sid: ", conf_sid);
-
   if (!conf_sid) {
     res.status(400).json({ message: "Conference sid not found" });
     return;
@@ -219,7 +219,7 @@ const getCallStreaming = (req, res) => {
 
   callSocketServers[conf_sid].on("connection", (ws) => {
     console.log("\n\n\n\nconnection has created");
-
+    streamConnected();
     ws.on("message", async (message) => {
       const data = JSON.parse(message); // Parsing the incoming message
       if (data.event === "connected") {
@@ -229,9 +229,8 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data); // Logging the pressed digit
       }
       if (data.event === "dtmf") {
+        sendDTMFEvent(data);
         console.log("\n\n\n\n\n\n\n\n\n\ndtmf event got: ", data);
-
-        // await sendPostRequestWithDigits(data?.dtmf.digit);
       }
       if (data.event === "stop") {
         console.log("Call stopped"); // Logging the pressed digit
@@ -252,22 +251,45 @@ const getCallStreaming = (req, res) => {
   });
 };
 
+async function streamConnected() {
+  try {
+    const response = await axios.get(
+      "https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php"
+    );
+  } catch (error) {
+    console.error("Error sending axios POST request:", error);
+  }
+}
+
+async function sendDTMFEvent(digit) {
+  try {
+    const response = await axios.post(
+      "https://invisibletest.myagecam.net/invisible/signalwire_call/get_DTMF_Event.php",
+      {
+        digit,
+      }
+    );
+  } catch (error) {
+    console.error("Error sending axios POST request:", error);
+  }
+}
+
 async function sendPostRequestWithOnCall(
-  call_sid,
+  call_id,
   conferenceName,
   from,
   to,
-  callId
+  call_sid_from_request
 ) {
   try {
-    console.log("sending request now : ", call_sid, conferenceName, from, to);
-
     let payload = {
       conferenceName,
-      call_sid,
+      call_id,
       from,
       to,
+      call_sid: call_sid_from_request,
     };
+    console.log("Payload for sending for conference");
     const response = await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/add_call_conference.php",
       payload

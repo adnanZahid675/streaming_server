@@ -15,7 +15,7 @@ const {
 router.get("/record-list", getVideoCTRL);
 router.get("/streaming", getStreaming);
 router.get("/callStreaming", getCallStreaming);
-router.get("/conference", getConferenceStreaming);
+router.post("/conference", getConferenceStreaming);
 router.get("/dialCall", dialAndAddToConference);
 router.get("/checkDigits", checkDigits);
 router.get("/closeAllSockets", closeAllSockets);

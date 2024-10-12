@@ -5,7 +5,7 @@ let callSocketServers = {};
 let callResult = {};
 const axios = require("axios");
 
-const { RelayConsumer } = require("@signalwire/node");
+// const { RelayConsumer } = require("@signalwire/node");
 
 // const consumer = new RelayConsumer({
 //   project: "93d5b1c7-b843-49e8-be85-b9882c51524d", // Replace with your project ID
@@ -36,42 +36,42 @@ const { RelayConsumer } = require("@signalwire/node");
 
 // consumer.run();
 
-const consumer = new RelayConsumer({
-  project: '93d5b1c7-b843-49e8-be85-b9882c51524d',
-  token: 'PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094',
-  contexts: ['office'],
-  ready: async ({ client }) => {
-    console.log('Client is ready!');
+// const consumer = new RelayConsumer({
+//   project: "93d5b1c7-b843-49e8-be85-b9882c51524d",
+//   token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
+//   contexts: ["office"],
+//   ready: async ({ client }) => {
+//     console.log("Client is ready!");
 
-    // Initialize calling if necessary (some setups might require this).
-    const calling = client.calling;
-    if (!calling) {
-      console.error("Calling capabilities not initialized.");
-      return;
-    }
+//     // Initialize calling if necessary (some setups might require this).
+//     const calling = client.calling;
+//     if (!calling) {
+//       console.error("Calling capabilities not initialized.");
+//       return;
+//     }
 
-    // Create a new conference
-    // const conferenceName = 'my-conference';
-    // try {
-    //   const conference = await client.calling.conferences.create({
-    //     name: conferenceName,
-    //     status: "in-progress",
-    //   });
-    //   console.log(`Conference created: ${conference.sid}`);
-    // } catch (error) {
-    //   console.error("Error creating conference:", error);
-    // }
-  },
-  onIncomingCall: async (call) => {
-    console.log(`Incoming call: ${call.id}`);
-    const { successful } = await call.answer();
-    if (!successful) return;
+//     // Create a new conference
+//     // const conferenceName = 'my-conference';
+//     // try {
+//     //   const conference = await client.calling.conferences.create({
+//     //     name: conferenceName,
+//     //     status: "in-progress",
+//     //   });
+//     //   console.log(`Conference created: ${conference.sid}`);
+//     // } catch (error) {
+//     //   console.error("Error creating conference:", error);
+//     // }
+//   },
+//   onIncomingCall: async (call) => {
+//     console.log(`Incoming call: ${call.id}`);
+//     const { successful } = await call.answer();
+//     if (!successful) return;
 
-    // Add participant logic here if needed.
-  }
-});
+//     // Add participant logic here if needed.
+//   },
+// });
 
-consumer.run();
+// consumer.run();
 
 const dialAndAddToConference = async (req, res) => {
   try {
@@ -82,31 +82,36 @@ const dialAndAddToConference = async (req, res) => {
     } else {
       console.log("all querry params from to \n", from, to);
     }
-
+    res.status(200).json({ message: "Processing request" });
     const dialedCall = await consumer.client.calling.dial({
       type: "phone",
       to: `+${to}`, // Replace with the destination number
       from: `+${from}`, // Replace with your SignalWire number
     });
+    console.log("dialed call ", dialedCall);
 
-    console.log("dialedCall", dialedCall);
-
-    if (dialedCall) {
-      const conference = await dialedCall?.client?.conference({
-        name: "Conference1", // Same conference as the one created earlier
-        from: dialedCall.from,
-      });
-      await dialedCall?.join(conference);
-    }
+    // if (dialedCall) {
+    //   const conference = await dialedCall?.client?.conference({
+    //     name: "Conference1", // Same conference as the one created earlier
+    //     from: dialedCall.from,
+    //   });
+    //   await dialedCall?.join(conference);
+    // }
   } catch (error) {
     console.error("Error making the call:", error);
   }
 };
 
 const getConferenceStreaming = async (req, res) => {
-  const { from, to, conferenceName } = req?.query;
-  if (!from || !to || !conferenceName) {
-    res.status(400).json({ message: "Query params are not completed" });
+  const { from, to, conferenceName } = req?.body;
+  if (!from || !to) {
+    res
+      .status(400)
+      .json({
+        message: `${!from ? "From number is required" : " "} ${
+          !to && "to number is required"
+        }`,
+      });
     return;
   } else {
     console.log("all querry params from to \n", from, to);
@@ -120,46 +125,60 @@ const getConferenceStreaming = async (req, res) => {
   });
 
   const call = await client.dialPhone({
-    from: `+${from}`,
-    to: `+${to}`,
+    from: `${from}`,
+    to: `${to}`,
   });
 
-  const conference = await call?.client?.conference({
-    name: conferenceName,
-    from: call.from,
-  });
-  await call.join(conference);
+  console.log("call", call);
+  console.log("call voptions", call?.options?.payload?.call_id);
 
-  call.on("collect.started", (collect) => {
-    console.log("collect.started", collect);
+  call.on("call.state", (newState) => {
+    if (newState === "ended") {
+      console.log("Call has ended.");
+    }
   });
-  call.on("collect.startOfInput", (collect) => {
-    console.log("Input collection started.");
-  });
-  call.on("collect.updated", (collect) => {
-    console.log("collect.updated", collect.digits);
-  });
-  call.on("collect.ended", (collect) => {
-    console.log("collect.ended", collect.digits);
-    callResult[requestId] = collect.digits;
-  });
-  call.on("collect.failed", (collect) => {
-    console.log("collect.failed", collect.reason);
-  });
-  const collect = await call.collect({
+
+  // const conference = await call?.client?.conference({
+  //   name: conferenceName,
+  //   from: call.from,
+  // });
+  // await call.join(conference);
+
+  let collectDigits = await call.collect({
     digits: {
       max: 10,
-      digitTimeout: 5,
+      digitTimeout: 3,
       terminators: "#*",
     },
   });
-  const { digits } = await collect.ended();
-  try {
-  } catch (error) {
-    console.log("\ngot error in catch section", JSON.stringify(error));
 
-    return;
-  }
+  call.on("collect.started", (collect) => {
+    console.log("\n\n\ncollect.started", collect);
+  });
+  call.on("collect.startOfInput", (collect) => {
+    console.log("\n\n\nInput collection started.");
+  });
+  call.on("collect.updated", (collect) => {
+    console.log("\n\n\ncollect.updated", collect.digits);
+  });
+  call.on("collect.ended", async (collect) => {
+    console.log("\n\n\ncollect.ended", collect.digits);
+    await call.playTTS({
+      text: "Please enter the number ",
+    });
+    collectDigits = await call.collect({
+      digits: {
+        max: 10,
+        digitTimeout: 3,
+        terminators: "#*",
+      },
+    });
+  });
+  call.on("collect.failed", (collect) => {
+    console.log("\n\n\ncollect.failed", collect.reason);
+  });
+  // const { digits } = await collectDigits.ended();
+  // console.log("digits: ", digits);
 };
 
 const checkDigits = (req, res) => {
@@ -196,7 +215,6 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data); // Logging the pressed digit
       }
       if (data.event === "dtmf") {
-        console.log("data?.dtmf.digit", data?.dtmf.digit);
         await sendPostRequestWithDigits(data?.dtmf.digit);
       }
       if (data.event === "stop") {

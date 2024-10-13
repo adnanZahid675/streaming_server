@@ -253,8 +253,9 @@ const getCallStreaming = (req, res) => {
 
 async function streamConnected() {
   try {
-    const response = await axios.get(
-      "https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php"
+    await axios.post(
+      "https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php",
+      { connected: true }
     );
   } catch (error) {
     console.error("Error sending axios POST request:", error);
@@ -263,7 +264,7 @@ async function streamConnected() {
 
 async function sendDTMFEvent(digit) {
   try {
-    const response = await axios.post(
+    await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/get_DTMF_Event.php",
       {
         digit,

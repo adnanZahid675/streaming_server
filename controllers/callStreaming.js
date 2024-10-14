@@ -110,14 +110,12 @@ const getConferenceStreaming = async (req, res) => {
     res.status(400).json({
       message: `${!from ? "From number is required" : " "} ${
         !to ? "to number is required" : ""
-      }${!call_sid ? "Call sid is required" : ""}${
-        !conference_name ? "Conference name is required" : ""
-      }
+      }${!url ? "Call sid is required" : ""}
           `,
     });
     return;
   } else {
-    console.log("\nall querry params from to \n", from, to);
+    console.log("\nall querry params from to \n", from, to, url);
   }
 
   const client = new Voice.Client({

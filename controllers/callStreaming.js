@@ -105,6 +105,10 @@ request = 0;
 
 const getConferenceStreaming = async (req, res) => {
   console.log("\n\nrequest call log", request++);
+  console.log("req?.body", req?.body);
+  console.log("\n\n\ncomplete req", req);
+  console.log("\n\n\n\n\n\n\n");
+
   const { from, to, url } = req?.body;
   if (!from || !to || !url) {
     res.status(400).json({

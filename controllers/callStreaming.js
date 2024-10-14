@@ -220,7 +220,7 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data); // Logging the pressed digit
       }
       if (data.event === "dtmf") {
-        // sendDTMFEvent(data);
+        sendDTMFEvent(data, conf_sid);
         console.log("\n\n\n\n\n\n\n\n\n\ndtmf event got: ", data);
       }
       if (data.event === "stop") {
@@ -253,16 +253,21 @@ async function streamConnected() {
   }
 }
 
-async function sendDTMFEvent(digit) {
+async function sendDTMFEvent(digit, call_id) {
+  let payload = {
+    call_id,
+    stream_sid: digit?.streamSid,
+    digit: digit?.dtmf?.digit,
+  };
   try {
+    console.log("payload\n\n\n\n", payload);
+
     await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php",
       {
-        digit,
+        payload,
       }
     );
-
-    ("0d37bfa5-2e4e-4fcb-857a-1b45ac8972e9");
   } catch (error) {
     console.error("Error sending axios POST request:", JSON.stringify(error));
   }

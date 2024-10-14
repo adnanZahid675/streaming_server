@@ -210,6 +210,8 @@ const getCallStreaming = (req, res) => {
     console.log("\n\n\n\nconnection has created");
     streamConnected();
     ws.on("message", async (message) => {
+      console.log("message:", message);
+
       const data = JSON.parse(message); // Parsing the incoming message
       if (data.event === "connected") {
         console.log("Connected now:", data); // Logging the pressed digit
@@ -260,7 +262,7 @@ async function sendDTMFEvent(digit) {
       }
     );
 
-    '0d37bfa5-2e4e-4fcb-857a-1b45ac8972e9'
+    ("0d37bfa5-2e4e-4fcb-857a-1b45ac8972e9");
   } catch (error) {
     console.error("Error sending axios POST request:", JSON.stringify(error));
   }

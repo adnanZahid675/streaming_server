@@ -134,13 +134,7 @@ const getConferenceStreaming = async (req, res) => {
     console.log("call voptions", call?.options?.payload?.call_id);
 
     if (call?.options?.payload?.call_id) {
-      sendPostRequestWithOnCall(
-        call?.options?.payload?.call_id,
-        conferenceName,
-        from,
-        to,
-        call_sid
-      );
+      sendPostRequestWithOnCall(url);
     }
     call.on("call.state", (newState) => {
       if (newState === "ended") {
@@ -272,26 +266,13 @@ async function sendDTMFEvent(digit) {
   }
 }
 
-async function sendPostRequestWithOnCall(
-  call_id,
-  conferenceName,
-  from,
-  to,
-  call_sid_from_request
-) {
+async function sendPostRequestWithOnCall(url) {
   try {
     let payload = {
-      conferenceName,
-      call_id,
-      from,
-      to,
-      call_sid: call_sid_from_request,
+      url,
+      message: "call is connected",
     };
-    console.log("Payload for sending for conference");
-    const response = await axios.post(
-      "https://invisibletest.myagecam.net/invisible/signalwire_call/add_call_conference.php",
-      payload
-    );
+    const response = await axios.post(url, payload);
   } catch (error) {
     console.error("Error sending axios POST request:", error);
   }

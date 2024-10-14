@@ -146,12 +146,6 @@ const getConferenceStreaming = async (req, res) => {
       }
     });
 
-    // const conference = await call?.client?.conference({
-    //   name: conferenceName,
-    //   from: call.from,
-    // });
-    // await call.join(conference);
-
     let collectDigits = await call.collect({
       digits: {
         max: 10,
@@ -224,7 +218,7 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data); // Logging the pressed digit
       }
       if (data.event === "dtmf") {
-        sendDTMFEvent(data);
+        // sendDTMFEvent(data);
         console.log("\n\n\n\n\n\n\n\n\n\ndtmf event got: ", data);
       }
       if (data.event === "stop") {
@@ -260,18 +254,19 @@ async function streamConnected() {
 async function sendDTMFEvent(digit) {
   try {
     await axios.post(
-      "https://invisibletest.myagecam.net/invisible/signalwire_call/get_DTMF_Event.php",
+      "https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php",
       {
         digit,
       }
     );
+
+    '0d37bfa5-2e4e-4fcb-857a-1b45ac8972e9'
   } catch (error) {
-    console.error("Error sending axios POST request:", error);
+    console.error("Error sending axios POST request:", JSON.stringify(error));
   }
 }
 
 async function sendPostRequestWithOnCall(url, call_id) {
-  console.log("url", url);
   try {
     let payload = {
       call_id,

@@ -105,14 +105,13 @@ request = 0;
 
 const getConferenceStreaming = async (req, res) => {
   console.log("\n\nrequest call log", request++);
-
-  const { from, to, call_sid, conferenceName } = req?.body;
-  if (!from || !to || !conferenceName || call_sid) {
+  const { from, to, url } = req?.body;
+  if (!from || !to || !url) {
     res.status(400).json({
       message: `${!from ? "From number is required" : " "} ${
         !to ? "to number is required" : ""
       }${!call_sid ? "Call sid is required" : ""}${
-        !conferenceName ? "Conference name is required" : ""
+        !conference_name ? "Conference name is required" : ""
       }
           `,
     });

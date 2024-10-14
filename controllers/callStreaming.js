@@ -109,8 +109,8 @@ const getConferenceStreaming = async (req, res) => {
   console.log("\n\n\ncomplete req", req);
   console.log("\n\n\n\n\n\n\n");
 
-  const { from, to, url } = req?.body;
-  if (!from || !to || !url) {
+  const { from, to, url, call_id } = req?.body;
+  if (!from || !to || !url || !call_id) {
     res.status(400).json({
       message: `${!from ? "From number is required" : " "} ${
         !to ? "to number is required" : ""
@@ -138,7 +138,7 @@ const getConferenceStreaming = async (req, res) => {
     console.log("call voptions", call?.options?.payload?.call_id);
 
     if (call?.options?.payload?.call_id) {
-      sendPostRequestWithOnCall(url);
+      sendPostRequestWithOnCall(url, call_id);
     }
     call.on("call.state", (newState) => {
       if (newState === "ended") {
@@ -270,13 +270,14 @@ async function sendDTMFEvent(digit) {
   }
 }
 
-async function sendPostRequestWithOnCall(url) {
+async function sendPostRequestWithOnCall(url, call_id) {
+  console.log("url", url);
   try {
     let payload = {
-      url,
-      message: "call is connected",
+      call_id,
     };
-    const response = await axios.post(url, payload);
+    const response = await axios.get(url, payload);
+    console.log("\n\ngot response : ", response);
   } catch (error) {
     console.error("Error sending axios POST request:", error);
   }

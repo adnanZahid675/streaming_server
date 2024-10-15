@@ -312,7 +312,7 @@ const initialGreetings = async (req, res) => {
   const responseXML = `
           <Response>
   <Say> Hello, please press 1 if you want to continue the call. </Say>
-  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" timeout="20" />
+  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" method="POST" timeout="20" />
 </Response>`;
 
   res.send(responseXML);
@@ -335,7 +335,18 @@ const calling_to_owner = async (req, res) => {
     call.create();
     res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
   } else {
-    res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
+      console.log("\n\nits from else part");
+      
+     // Call Person B
+     const call = new signalwire.call({
+      from: "+YourSignalWireNumber",
+      to: "+PersonBPhoneNumber",
+      url: "https://yourserver.com/connect_call",
+    });
+
+    call.create();
+    res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
+    // res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
   }
 
   // from = "+18016506700";
@@ -375,7 +386,7 @@ const status_call_back = (req, res) => {
   res.send(`
     <Response>
       <Say>Thank you for the call. To authorize Person A, please press 1.</Say>
-      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization"/>
+      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST"/>
     </Response>
   `);
 };

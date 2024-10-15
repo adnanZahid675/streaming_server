@@ -146,8 +146,6 @@ const getCallStreaming = (req, res) => {
     console.log("\n\n\n\nconnection has created");
     streamConnected(conf_sid);
     ws.on("message", async (message) => {
-      console.log("message:", message);
-
       const data = JSON.parse(message); // Parsing the incoming message
       if (data.event === "connected") {
         console.log("Connected now:", data); // Logging the pressed digit

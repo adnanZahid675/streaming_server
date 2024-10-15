@@ -287,6 +287,9 @@ const bridge_end = async (req, res) => {
 
   console.log("\n\n\n\n\nbridge_end", req.body);
 
+  to = "+12019716175"; // signal wire
+  from = "+18334356935"; // owner number
+
   const call = await client.calls.create({
     from: from, // The SignalWire number that Person A called
     to: to, // The phone number of Person B

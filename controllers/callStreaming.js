@@ -255,12 +255,10 @@ const calling_to_owner = async (req, res) => {
     const responseXML = `
      <Response>
         <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back" hangupOnStar="false" method="POST" endOnBridge="false">
+        <Dial callerId="${from}" hangupOnStar="false" endOnBridge="false">
           <Number statusCallbackEvent="answered completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back">${to}</Number>
         </Dial>
-        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/handle_authorization" method="POST">
-            <Say>Please press 1 to authorize Person A.</Say>
-        </Gather>
+       
       </Response>`;
 
     res.set("Content-Type", "text/xml");
@@ -299,7 +297,7 @@ const connect_call = (req, res) => {
 
 const status_call_back = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
-  console.log("\n\n\n\n\nstatus_call_back ");
+  console.log("\n\n\n\n\nstatus_call_back ended ");
   res.send(`
     <Response>
       <Say>Thank you for the call. To authorize Person A, please press 1.</Say>

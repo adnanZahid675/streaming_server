@@ -314,6 +314,8 @@ const calling_to_owner = async (req, res) => {
     from: from, // The SignalWire number that Person A called
     to: to, // The phone number of Person B
     url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
+    statusCallback:
+      "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
   });
 
   console.log("Call initiated successfully");
@@ -323,7 +325,7 @@ const calling_to_owner = async (req, res) => {
 
 const connect_call = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
-  console.log("is it comming here ");
+  console.log("\n\n\n\n\nis it comming here ");
   res.send(`
     <Response>
       <Dial>
@@ -331,6 +333,38 @@ const connect_call = (req, res) => {
       </Dial>
     </Response>
   `);
+};
+
+const status_call_back = (req, res) => {
+  // Respond with LaML to dial Person B and bridge the call
+  console.log("\n\n\n\n\nstatus_call_back ");
+  res.send(`
+    <Response>
+      <Say>Thank you for the call. To authorize Person A, please press 1.</Say>
+      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" timeout="10" />
+    </Response>
+  `);
+};
+
+const process_authorization = (req, res) => {
+  const digit = req.body.Digits;
+  console.log("\n\n\n\n\n\n\n\ngot digit from the owner", digit);
+  if (digit == "1") {
+    // Send an SMS to Person A to confirm authorization
+    // const messaging = new signalwire.messaging({
+    //   from: "+YourSignalWireNumber",
+    //   to: "+PersonAPhoneNumber",
+    //   body: "You have been authorized by Person B!",
+    // });
+
+    // messaging.create(); // Send the SMS
+
+    res.send(
+      "<Response><Say>Thank you, Person A has been authorized.</Say></Response>"
+    );
+  } else {
+    res.send("<Response><Say>Authorization failed. Goodbye.</Say></Response>");
+  }
 };
 
 module.exports = {
@@ -343,4 +377,6 @@ module.exports = {
   // calling_to_owner
   calling_to_owner,
   connect_call,
+  status_call_back,
+  process_authorization,
 };

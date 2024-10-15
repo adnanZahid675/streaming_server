@@ -12,6 +12,8 @@ const {
   dialAndAddToConference,
   calling_to_owner,
   connect_call,
+  status_call_back,
+  process_authorization,
 } = require("./callStreaming");
 
 module.exports = {
@@ -28,4 +30,6 @@ module.exports = {
   // calling_to_owner,
   calling_to_owner,
   connect_call,
+  status_call_back,
+  process_authorization
 };

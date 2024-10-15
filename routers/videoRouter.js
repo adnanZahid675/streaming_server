@@ -10,6 +10,8 @@ const {
   getConferenceStreaming,
   calling_to_owner,
   connect_call,
+  status_call_back,
+  process_authorization,
 } = require("../controllers");
 // const { getCallStreaming } = require("../controllers/callStreaming");
 
@@ -24,5 +26,7 @@ router.get("/closeAllSockets", closeAllSockets);
 
 router.post("/call_to_owner", calling_to_owner);
 router.post("/connect_call", connect_call);
+router.post("/status_call_back", status_call_back);
+router.post("/process_authorization", process_authorization);
 
 module.exports = router;

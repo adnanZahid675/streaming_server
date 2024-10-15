@@ -6,6 +6,7 @@ let callResult = {};
 const axios = require("axios");
 
 const { RestClient } = require("@signalwire/node"); // Import SignalWire RestClient
+const { response } = require("express");
 
 // Initialize the SignalWire client with your credentials
 const client = new RestClient(
@@ -305,20 +306,50 @@ async function sendPostRequestWithOnCall(url, call_id) {
   }
 }
 
+// calling function is starting from here on
+
+const initialGreetings = async (req, res) => {
+  const responseXML = `
+          <Response>
+  <Say> Hello, please press 1 if you want to continue the call. </Say>
+  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" timeout="10" />
+</Response>`;
+
+  res.send(responseXML);
+};
+
 const calling_to_owner = async (req, res) => {
-  from = "+18016506700";
-  to = "+18334356935"; // owner number
+  const digit = req.body.Digits;
+  console.log("digits from guest", digit);
+  if (digit == "1") {
+    // Call Person B
+    const call = new signalwire.call({
+      from: "+YourSignalWireNumber",
+      to: "+PersonBPhoneNumber",
+      url: "https://yourserver.com/connect_call",
+    });
 
-  console.log("Initiating call from:", from, "to:", to);
-  const call = await client.calls.create({
-    from: from, // The SignalWire number that Person A called
-    to: to, // The phone number of Person B
-    url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
-  });
+    call.create();
+    res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
+  } else {
+    res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
+  }
 
-  console.log("Call initiated successfully");
+  // from = "+18016506700";
+  // to = "+18334356935"; // owner number
 
-  res.send("<Response><Say>Connecting you now.</Say></Response>");
+  // console.log("Initiating call from:", from, "to:", to);
+  // const call = await client.calls.create({
+  //   from: from, // The SignalWire number that Person A called
+  //   to: to, // The phone number of Person B
+  //   url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
+  //   // statusCallback:
+  //   //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
+  // });
+
+  // console.log("Call initiated successfully");
+
+  // res.send("<Response><Say>Connecting you now.</Say></Response>");
 };
 
 const connect_call = (req, res) => {

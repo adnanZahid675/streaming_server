@@ -255,9 +255,12 @@ const calling_to_owner = async (req, res) => {
     const responseXML = `
      <Response>
         <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back" hangupOnStar="false" endOnBridge="false">
+        <Dial callerId="${from}" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back" hangupOnStar="false" method="POST" endOnBridge="false">
           <Number statusCallbackEvent="answered completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back">${to}</Number>
         </Dial>
+        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/handle_authorization" method="POST">
+            <Say>Please press 1 to authorize Person A.</Say>
+        </Gather>
       </Response>`;
 
     res.set("Content-Type", "text/xml");

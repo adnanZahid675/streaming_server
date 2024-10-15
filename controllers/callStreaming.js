@@ -4,9 +4,9 @@ const WebSocket = require("ws");
 let callSocketServers = {};
 let callResult = {};
 const axios = require("axios");
+const { response } = require("express");
 
 const { RestClient } = require("@signalwire/node"); // Import SignalWire RestClient
-const { response } = require("express");
 
 // Initialize the SignalWire client with your credentials
 const client = new RestClient(
@@ -16,84 +16,6 @@ const client = new RestClient(
     signalwireSpaceUrl: "myautogate.signalwire.com", // Replace with your SignalWire space URL
   }
 );
-
-// const client = new SignalWire.RestClient(
-//   "93d5b1c7-b843-49e8-be85-b9882c51524d",
-//   "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
-//   {
-//     signalwireSpaceUrl: "myautogate.signalwire.com",
-//   }
-// );
-
-// console.log("cleint : ", client);
-
-// const voiceResponse = new SignalWire.VoiceResponse();
-
-// const consumer = new RelayConsumer({
-//   project: "93d5b1c7-b843-49e8-be85-b9882c51524d", // Replace with your project ID
-//   token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094", // Replace with your API token
-//   contexts: ["office"], // Contexts to listen for inbound calls
-//   onIncomingCall: async (call) => {
-//     try {
-//       console.log("Incoming call from: ", call.from);
-
-//       // Answer the incoming call
-//       await call.answer();
-
-//       // Add the incoming call to a conference
-//       const conference = await call?.client?.conference({
-//         name: "Conference1", // Name your conference
-//         from: call.from,
-//       });
-
-//       // Add the incoming call to the conference
-//       await call.join(conference);
-
-//       console.log("Call joined the conference");
-//     } catch (error) {
-//       console.error("Error handling the call: ", error);
-//     }
-//   },
-// });
-
-// consumer.run();
-
-// const consumer = new RelayConsumer({
-//   project: "93d5b1c7-b843-49e8-be85-b9882c51524d",
-//   token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
-//   contexts: ["office"],
-//   ready: async ({ client }) => {
-//     console.log("Client is ready!");
-
-//     // Initialize calling if necessary (some setups might require this).
-//     const calling = client.calling;
-//     if (!calling) {
-//       console.error("Calling capabilities not initialized.");
-//       return;
-//     }
-
-//     // Create a new conference
-//     // const conferenceName = 'my-conference';
-//     // try {
-//     //   const conference = await client.calling.conferences.create({
-//     //     name: conferenceName,
-//     //     status: "in-progress",
-//     //   });
-//     //   console.log(`Conference created: ${conference.sid}`);
-//     // } catch (error) {
-//     //   console.error("Error creating conference:", error);
-//     // }
-//   },
-//   onIncomingCall: async (call) => {
-//     console.log(`Incoming call: ${call.id}`);
-//     const { successful } = await call.answer();
-//     if (!successful) return;
-
-//     // Add participant logic here if needed.
-//   },
-// });
-
-// consumer.run();
 
 const dialAndAddToConference = async (req, res) => {
   try {
@@ -111,14 +33,6 @@ const dialAndAddToConference = async (req, res) => {
       from: `+${from}`, // Replace with your SignalWire number
     });
     console.log("dialed call ", dialedCall);
-
-    // if (dialedCall) {
-    //   const conference = await dialedCall?.client?.conference({
-    //     name: "Conference1", // Same conference as the one created earlier
-    //     from: dialedCall.from,
-    //   });
-    //   await dialedCall?.join(conference);
-    // }
   } catch (error) {
     console.error("Error making the call:", error);
   }
@@ -309,10 +223,12 @@ async function sendPostRequestWithOnCall(url, call_id) {
 // calling function is starting from here on
 
 const initialGreetings = async (req, res) => {
+  console.log("\n\n\ngreeting");
+  
   const responseXML = `
           <Response>
   <Say> Hello, please press 1 if you want to continue the call. </Say>
-  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" method="POST"/>
+  <Gather numDigits="1" action='https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner' method='POST' timeout='10'/>
 </Response>`;
 
   res.send(responseXML);

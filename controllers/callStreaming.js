@@ -179,13 +179,18 @@ const getCallStreaming = (req, res) => {
 };
 
 async function streamConnected(call_id) {
+  console.log("callId L: ", call_id);
+
   try {
-    await axios.post(
+    const resp = await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php",
-      { connected: true, call_id }
+      { connected: true, call_id: call_id }
     );
+
+    console.log("\n\n\n got responseL ", resp);
+    resp;
   } catch (error) {
-    console.error("Error sending axios POST request:", error);
+    console.error("\n\n\n\n\n\nError sending axios POST request:", error);
   }
 }
 

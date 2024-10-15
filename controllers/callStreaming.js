@@ -224,7 +224,7 @@ async function sendPostRequestWithOnCall(url, call_id) {
 
 const initialGreetings = async (req, res) => {
   console.log("\n\n\ngreeting");
-  
+
   const responseXML = `
           <Response>
   <Say> Hello, please press 1 if you want to continue the call. </Say>
@@ -247,15 +247,27 @@ const calling_to_owner = async (req, res) => {
   // console.log("Call initiated successfully");
 
   if (digit == "1") {
-    const call = await client.calls.create({
-      from: from, // The SignalWire number that Person A called
-      to: to, // The phone number of Person B
-      url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
-      // statusCallback:
-      //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
-    });
+    // Bridge the two calls using <Dial> verb
+    const responseXML = `
+     <Response>
+       <Say>Connecting you to Person B now.</Say>
+       <Dial callerId="${from}">
+         <Number>${to}</Number>
+       </Dial>
+     </Response>`;
 
-    res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
+    res.set("Content-Type", "text/xml");
+    res.send(responseXML); // This will bridge Person A and Person B
+
+    // const call = await client.calls.create({
+    //   from: from, // The SignalWire number that Person A called
+    //   to: to, // The phone number of Person B
+    //   url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
+    //   // statusCallback:
+    //   //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
+    // });
+
+    // res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
   } else {
     console.log("\n\nits from else part");
     console.log("Initiating call from:", from, "to:", to);

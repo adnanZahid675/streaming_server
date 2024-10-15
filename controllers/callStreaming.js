@@ -312,7 +312,7 @@ const initialGreetings = async (req, res) => {
   const responseXML = `
           <Response>
   <Say> Hello, please press 1 if you want to continue the call. </Say>
-  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" method="POST" timeout="20" />
+  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" method="POST"/>
 </Response>`;
 
   res.send(responseXML);
@@ -354,22 +354,6 @@ const calling_to_owner = async (req, res) => {
     res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
     // res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
   }
-
-  // from = "+18016506700";
-  // to = "+18334356935"; // owner number
-
-  // console.log("Initiating call from:", from, "to:", to);
-  // const call = await client.calls.create({
-  //   from: from, // The SignalWire number that Person A called
-  //   to: to, // The phone number of Person B
-  //   url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
-  //   // statusCallback:
-  //   //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
-  // });
-
-  // console.log("Call initiated successfully");
-
-  // res.send("<Response><Say>Connecting you now.</Say></Response>");
 };
 
 const connect_call = (req, res) => {
@@ -378,7 +362,9 @@ const connect_call = (req, res) => {
 
   // dialing owner number
   res.send(`
+    
     <Response>
+      <Say>Dialing now. Please wait</Say>
       <Dial>
         <Number>+1834356935</Number>
       </Dial>

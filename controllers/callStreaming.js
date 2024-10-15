@@ -410,4 +410,5 @@ module.exports = {
   connect_call,
   status_call_back,
   process_authorization,
+  initialGreetings
 };

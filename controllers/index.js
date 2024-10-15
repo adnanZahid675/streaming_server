@@ -14,6 +14,7 @@ const {
   connect_call,
   status_call_back,
   process_authorization,
+  initialGreetings,
 } = require("./callStreaming");
 
 module.exports = {
@@ -31,5 +32,6 @@ module.exports = {
   calling_to_owner,
   connect_call,
   status_call_back,
-  process_authorization
+  process_authorization,
+  initialGreetings
 };

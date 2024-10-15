@@ -143,15 +143,14 @@ const getCallStreaming = (req, res) => {
   callSocketServers[conf_sid] = callSocket;
 
   callSocketServers[conf_sid].on("connection", (ws) => {
-    console.log("\n\n\n\nconnection has created");
     streamConnected(conf_sid);
     ws.on("message", async (message) => {
-      const data = JSON.parse(message); // Parsing the incoming message
+      const data = JSON.parse(message);
       if (data.event === "connected") {
-        console.log("Connected now:", data); // Logging the pressed digit
+        console.log("Connected now:", data);
       }
       if (data.event === "start") {
-        console.log("Started now:", data); // Logging the pressed digit
+        console.log("Started now:", data);
       }
       if (data.event === "dtmf") {
         sendDTMFEvent(data, conf_sid);
@@ -178,7 +177,6 @@ const getCallStreaming = (req, res) => {
 
 async function streamConnected(call_id) {
   console.log("callId L: ", call_id);
-
   try {
     const resp = await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php",
@@ -188,7 +186,10 @@ async function streamConnected(call_id) {
     console.log("\n\n\n got responseL ", resp);
     resp;
   } catch (error) {
-    console.error("\n\n\n\n\n\nError sending axios POST request:", error);
+    console.error(
+      "\n\n\n\n\n\nError sending axios POST request:",
+      error?.message
+    );
   }
 }
 
@@ -244,7 +245,7 @@ const calling_to_owner = async (req, res) => {
   const digit = req.body.Digits;
   console.log("digits from guest", digit);
 
-  from = "+18016506700";
+  from = "+12019716175"; // signal wire
   to = "+18334356935"; // owner number
 
   // console.log("Call initiated successfully");
@@ -261,16 +262,6 @@ const calling_to_owner = async (req, res) => {
 
     res.set("Content-Type", "text/xml");
     res.send(responseXML); // This will bridge Person A and Person B
-
-    // const call = await client.calls.create({
-    //   from: from, // The SignalWire number that Person A called
-    //   to: to, // The phone number of Person B
-    //   url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
-    //   // statusCallback:
-    //   //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
-    // });
-
-    // res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
   } else {
     console.log("\n\nits from else part");
     console.log("Initiating call from:", from, "to:", to);

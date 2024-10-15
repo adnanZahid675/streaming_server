@@ -178,9 +178,8 @@ const getCallStreaming = (req, res) => {
 async function streamConnected(call_id) {
   console.log("callId L: ", call_id);
   try {
-    const resp = await axios.post(
-      "https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php",
-      { connected: true, call_id: call_id }
+    const resp = await axios.get(
+      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php?callId=${call_id}`
     );
 
     console.log("\n\n\n got responseL ", resp);

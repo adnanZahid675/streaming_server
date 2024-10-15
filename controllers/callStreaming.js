@@ -282,17 +282,27 @@ const connect_call = (req, res) => {
   `);
 };
 
-const bridge_end = (req, res) => {
+const bridge_end = async (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
 
   console.log("\n\n\n\n\nbridge_end", req.body);
-  res.send(`
-    <Response>
-      <Dial >
-        <Number>+18334356935</Number> 
-      </Dial>
-    </Response>
-  `);
+
+  const call = await client.calls.create({
+    from: from, // The SignalWire number that Person A called
+    to: to, // The phone number of Person B
+    // statusCallback:
+    //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
+  });
+
+  console.log("created");
+
+  // res.send(`
+  //   <Response>
+  //     <Dial >
+  //       <Number>+18334356935</Number>
+  //     </Dial>
+  //   </Response>
+  // `);
 };
 
 const status_call_back = (req, res) => {

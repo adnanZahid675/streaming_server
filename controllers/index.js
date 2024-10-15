@@ -9,7 +9,9 @@ const {
   callSocketServers,
   checkDigits,
   getConferenceStreaming,
-  dialAndAddToConference
+  dialAndAddToConference,
+  calling_to_owner,
+  connect_call,
 } = require("./callStreaming");
 
 module.exports = {
@@ -21,5 +23,9 @@ module.exports = {
   callSocketServers,
   checkDigits,
   getConferenceStreaming,
-  dialAndAddToConference
+  dialAndAddToConference,
+
+  // calling_to_owner,
+  calling_to_owner,
+  connect_call,
 };

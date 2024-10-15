@@ -8,6 +8,8 @@ const {
   checkDigits,
   dialAndAddToConference,
   getConferenceStreaming,
+  calling_to_owner,
+  connect_call,
 } = require("../controllers");
 // const { getCallStreaming } = require("../controllers/callStreaming");
 
@@ -19,5 +21,8 @@ router.post("/conference", getConferenceStreaming);
 router.get("/dialCall", dialAndAddToConference);
 router.get("/checkDigits", checkDigits);
 router.get("/closeAllSockets", closeAllSockets);
+
+router.post("/call_to_owner", calling_to_owner);
+router.post("/connect_call", connect_call);
 
 module.exports = router;

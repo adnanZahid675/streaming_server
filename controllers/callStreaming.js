@@ -5,7 +5,28 @@ let callSocketServers = {};
 let callResult = {};
 const axios = require("axios");
 
-// const { RelayConsumer } = require("@signalwire/node");
+const { RestClient } = require("@signalwire/node"); // Import SignalWire RestClient
+
+// Initialize the SignalWire client with your credentials
+const client = new RestClient(
+  "93d5b1c7-b843-49e8-be85-b9882c51524d",
+  "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
+  {
+    signalwireSpaceUrl: "myautogate.signalwire.com", // Replace with your SignalWire space URL
+  }
+);
+
+// const client = new SignalWire.RestClient(
+//   "93d5b1c7-b843-49e8-be85-b9882c51524d",
+//   "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
+//   {
+//     signalwireSpaceUrl: "myautogate.signalwire.com",
+//   }
+// );
+
+// console.log("cleint : ", client);
+
+// const voiceResponse = new SignalWire.VoiceResponse();
 
 // const consumer = new RelayConsumer({
 //   project: "93d5b1c7-b843-49e8-be85-b9882c51524d", // Replace with your project ID
@@ -261,7 +282,6 @@ async function sendDTMFEvent(digit, call_id) {
   };
   try {
     console.log("payload\n\n\n\n", payload);
-
     await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php",
       {
@@ -285,10 +305,42 @@ async function sendPostRequestWithOnCall(url, call_id) {
   }
 }
 
+const calling_to_owner = async (req, res) => {
+  from = "+18016506700";
+  to = "+18334356935";
+
+  console.log("Initiating call from:", from, "to:", to);
+  const call = await client.calls.create({
+    from: from, // The SignalWire number that Person A called
+    to: to, // The phone number of Person B
+    url: "http://localhost:3002/api/connect_call", // LaML URL to handle the call
+  });
+
+  console.log("Call initiated successfully");
+
+  res.send("<Response><Say>Connecting you now.</Say></Response>");
+};
+
+const connect_call = (req, res) => {
+  // Respond with LaML to dial Person B and bridge the call
+  console.log("is it comming here ");
+  res.send(`
+    <Response>
+      <Dial>
+        <Number>+1834356935</Number>
+      </Dial>
+    </Response>
+  `);
+};
+
 module.exports = {
   getCallStreaming,
   callSocketServers,
   checkDigits,
   getConferenceStreaming,
   dialAndAddToConference,
+
+  // calling_to_owner
+  calling_to_owner,
+  connect_call,
 };

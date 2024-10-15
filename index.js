@@ -24,19 +24,25 @@ const server = http.createServer(app);
 server.on("upgrade", (request, socket, head) => {
   console.log("request.url", request.url);
   if (request.url.includes("callStreaming")) {
-    const call_sid = new URL(request.url, `https://${request.headers.host}`).searchParams.get("call_sid");
+    const call_sid = new URL(
+      request.url,
+      `https://${request.headers.host}`
+    ).searchParams.get("call_sid");
     console.log("handle call streaming web socket", call_sid);
     if (callSocketServers[call_sid]) {
       callSocketServers[call_sid].handleUpgrade(request, socket, head, (ws) => {
         callSocketServers[call_sid].emit("connection", ws, request);
       });
     } else {
-      console.log("not get the socket",call_sid);
+      console.log("not get the socket", call_sid);
       socket.destroy();
     }
     return;
   }
-  const uniqueId = new URL(request.url, `http://${request.headers.host}`).searchParams.get("id");
+  const uniqueId = new URL(
+    request.url,
+    `http://${request.headers.host}`
+  ).searchParams.get("id");
   if (webSocketServers[uniqueId]) {
     webSocketServers[uniqueId].handleUpgrade(request, socket, head, (ws) => {
       webSocketServers[uniqueId].emit("connection", ws, request);

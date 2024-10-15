@@ -248,18 +248,14 @@ const calling_to_owner = async (req, res) => {
   to = "+18334356935"; // owner number
 
   if (digit == "1") {
+    console.log("going to create a bridge between guest and owner");
+
     const responseXML = `
      <Response>
         <Say>Connecting you to Person B now.</Say>
         <Dial callerId="${from}"  hangupOnStar="false" endOnBridge="false">
           <Number statusCallbackEvent="completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">${to}</Number>
         </Dial>
-
-        <Say>Person B has disconnected. You can press 1 to leave a message, or hang up.</Say>
-        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/handle_input" method="POST">
-          <Say>Please enter a digit now.</Say>
-        </Gather>
-        
       </Response>`;
 
     console.log("calling initiated");
@@ -292,11 +288,15 @@ const bridge_end = (req, res) => {
   console.log("\n\n\n\n\nbridge_end", req.body);
   res.send(`
     <Response>
-<Say>The call has ended. Please press a digit to authorize Person A.</Say>
-<Gather action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" numDigits="1" timeout="50">
-<Say>Press a digit now.</Say>
-</Gather>
-</Response>
+      <Say>The call has ended. Please wait while we connect you to Person B.</Say>
+      <Dial>
+        <Number>+18334356935</Number> <!-- Owner's number -->
+      </Dial>
+      <Say>The call has ended. Please press a digit to authorize Person A.</Say>
+      <Gather action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" numDigits="1" timeout="50">
+        <Say>Press a digit now.</Say>
+      </Gather>
+    </Response>
   `);
 };
 

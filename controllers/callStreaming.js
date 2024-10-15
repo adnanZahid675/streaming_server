@@ -312,13 +312,16 @@ const initialGreetings = async (req, res) => {
   const responseXML = `
           <Response>
   <Say> Hello, please press 1 if you want to continue the call. </Say>
-  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" timeout="10" />
+  <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner" timeout="20" />
 </Response>`;
 
   res.send(responseXML);
 };
 
 const calling_to_owner = async (req, res) => {
+  console.log("\n\n\nreq", req.body,"\n\n\n\n\n\n\n\\n\n");
+  console.log("\n\n\nreq.body", req.body);
+
   const digit = req.body.Digits;
   console.log("digits from guest", digit);
   if (digit == "1") {
@@ -410,5 +413,5 @@ module.exports = {
   connect_call,
   status_call_back,
   process_authorization,
-  initialGreetings
+  initialGreetings,
 };

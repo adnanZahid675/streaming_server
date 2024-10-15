@@ -252,7 +252,7 @@ const calling_to_owner = async (req, res) => {
     const responseXML = `
      <Response>
         <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}">
+        <Dial callerId="${from}"  hangupOnStar="false" endOnBridge="false">
           <Number statusCallbackEvent="completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">${to}</Number>
         </Dial>
       </Response>`;

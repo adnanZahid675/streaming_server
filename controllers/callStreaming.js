@@ -313,7 +313,7 @@ const calling_to_owner = async (req, res) => {
   const call = await client.calls.create({
     from: from, // The SignalWire number that Person A called
     to: to, // The phone number of Person B
-    url: "http://localhost:3002/api/connect_call", // LaML URL to handle the call
+    url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
   });
 
   console.log("Call initiated successfully");

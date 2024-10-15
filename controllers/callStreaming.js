@@ -144,7 +144,7 @@ const getCallStreaming = (req, res) => {
 
   callSocketServers[conf_sid].on("connection", (ws) => {
     console.log("\n\n\n\nconnection has created");
-    streamConnected();
+    streamConnected(conf_sid);
     ws.on("message", async (message) => {
       console.log("message:", message);
 
@@ -178,11 +178,11 @@ const getCallStreaming = (req, res) => {
   });
 };
 
-async function streamConnected() {
+async function streamConnected(call_id) {
   try {
     await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php",
-      { connected: true }
+      { connected: true, call_id }
     );
   } catch (error) {
     console.error("Error sending axios POST request:", error);
@@ -250,11 +250,11 @@ const calling_to_owner = async (req, res) => {
     // Bridge the two calls using <Dial> verb
     const responseXML = `
      <Response>
-       <Say>Connecting you to Person B now.</Say>
-       <Dial callerId="${from}">
-         <Number statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back">${to}</Number>
-       </Dial>
-     </Response>`;
+        <Say>Connecting you to Person B now.</Say>
+        <Dial callerId="${from}" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/post_call_action" hangupOnStar="false" endOnBridge="false">
+          <Number statusCallbackEvent="answered completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_status_callback">${to}</Number>
+        </Dial>
+      </Response>`;
 
     res.set("Content-Type", "text/xml");
     res.send(responseXML); // This will bridge Person A and Person B

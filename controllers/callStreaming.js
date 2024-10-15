@@ -307,15 +307,13 @@ async function sendPostRequestWithOnCall(url, call_id) {
 
 const calling_to_owner = async (req, res) => {
   from = "+18016506700";
-  to = "+18334356935";
+  to = "+18334356935"; // owner number
 
   console.log("Initiating call from:", from, "to:", to);
   const call = await client.calls.create({
     from: from, // The SignalWire number that Person A called
     to: to, // The phone number of Person B
     url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
-    statusCallback:
-      "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
   });
 
   console.log("Call initiated successfully");
@@ -326,6 +324,8 @@ const calling_to_owner = async (req, res) => {
 const connect_call = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
   console.log("\n\n\n\n\nis it comming here ");
+
+  // dialing owner number
   res.send(`
     <Response>
       <Dial>
@@ -341,7 +341,7 @@ const status_call_back = (req, res) => {
   res.send(`
     <Response>
       <Say>Thank you for the call. To authorize Person A, please press 1.</Say>
-      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" timeout="10" />
+      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization"/>
     </Response>
   `);
 };

@@ -248,34 +248,21 @@ const calling_to_owner = async (req, res) => {
   from = "+12019716175"; // signal wire
   to = "+18334356935"; // owner number
 
-  // console.log("Call initiated successfully");
-
   if (digit == "1") {
-    // Bridge the two calls using <Dial> verb
     const responseXML = `
      <Response>
         <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}" hangupOnStar="false" endOnBridge="false">
-          <Number statusCallbackEvent="answered completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back">${to}</Number>
+        <Dial callerId="${from}">
+          <Number statusCallbackEvent="completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">${to}</Number>
         </Dial>
-       
       </Response>`;
+
+    console.log("calling initiated");
 
     res.set("Content-Type", "text/xml");
     res.send(responseXML); // This will bridge Person A and Person B
   } else {
-    console.log("\n\nits from else part");
-    console.log("Initiating call from:", from, "to:", to);
-
-    const call = await client.calls.create({
-      from: from, // The SignalWire number that Person A called
-      to: to, // The phone number of Person B
-      url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
-      // statusCallback:
-      //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
-    });
-    res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
-    // res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
+    res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
   }
 };
 
@@ -292,6 +279,19 @@ const connect_call = (req, res) => {
         <Number>+1834356935</Number>
       </Dial>
     </Response>
+  `);
+};
+
+const bridge_end = (req, res) => {
+  // Respond with LaML to dial Person B and bridge the call
+  console.log("\n\n\n\n\nbridge_end");
+  res.send(`
+    <Response>
+<Say>The call has ended. Please press a digit to authorize Person A.</Say>
+<Gather action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" numDigits="1">
+<Say>Press a digit now.</Say>
+</Gather>
+</Response>
   `);
 };
 
@@ -340,4 +340,5 @@ module.exports = {
   status_call_back,
   process_authorization,
   initialGreetings,
+  bridge_end,
 };

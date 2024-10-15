@@ -13,6 +13,7 @@ const {
   status_call_back,
   process_authorization,
   initialGreetings,
+  bridge_end,
 } = require("../controllers");
 // const { getCallStreaming } = require("../controllers/callStreaming");
 
@@ -30,6 +31,7 @@ router.post("/call_to_owner", calling_to_owner);
 router.post("/connect_call", connect_call);
 router.post("/status_call_back", status_call_back);
 router.post("/process_authorization", process_authorization);
+router.post("/bridge_end", bridge_end);
 
 module.exports = router;
 

@@ -288,14 +288,9 @@ const bridge_end = (req, res) => {
   console.log("\n\n\n\n\nbridge_end", req.body);
   res.send(`
     <Response>
-      <Say>The call has ended. Please wait while we connect you to Person B.</Say>
-      <Dial>
-        <Number>+18334356935</Number> <!-- Owner's number -->
+      <Dial >
+        <Number>+18334356935</Number> 
       </Dial>
-      <Say>The call has ended. Please press a digit to authorize Person A.</Say>
-      <Gather action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" numDigits="1" timeout="50">
-        <Say>Press a digit now.</Say>
-      </Gather>
     </Response>
   `);
 };

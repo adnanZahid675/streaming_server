@@ -319,32 +319,38 @@ const initialGreetings = async (req, res) => {
 };
 
 const calling_to_owner = async (req, res) => {
-  console.log("\n\n\nreq", req.body,"\n\n\n\n\n\n\n\\n\n");
+  console.log("\n\n\nreq", req.body, "\n\n\n\n\n\n\n\\n\n");
   console.log("\n\n\nreq.body", req.body);
 
   const digit = req.body.Digits;
   console.log("digits from guest", digit);
+
+  from = "+18016506700";
+  to = "+18334356935"; // owner number
+
+  // console.log("Call initiated successfully");
+
   if (digit == "1") {
-    // Call Person B
-    const call = new signalwire.call({
-      from: "+YourSignalWireNumber",
-      to: "+PersonBPhoneNumber",
-      url: "https://yourserver.com/connect_call",
+    const call = await client.calls.create({
+      from: from, // The SignalWire number that Person A called
+      to: to, // The phone number of Person B
+      url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
+      // statusCallback:
+      //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
     });
 
-    call.create();
     res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
   } else {
-      console.log("\n\nits from else part");
-      
-     // Call Person B
-     const call = new signalwire.call({
-      from: "+YourSignalWireNumber",
-      to: "+PersonBPhoneNumber",
-      url: "https://yourserver.com/connect_call",
-    });
+    console.log("\n\nits from else part");
+    console.log("Initiating call from:", from, "to:", to);
 
-    call.create();
+    const call = await client.calls.create({
+      from: from, // The SignalWire number that Person A called
+      to: to, // The phone number of Person B
+      url: "https://callstream-6b64fe9b1f4d.herokuapp.com/api/connect_call", // LaML URL to handle the call
+      // statusCallback:
+      //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
+    });
     res.send("<Response><Say>Connecting you to Person B now.</Say></Response>");
     // res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
   }

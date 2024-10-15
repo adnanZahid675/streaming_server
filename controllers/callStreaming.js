@@ -255,6 +255,12 @@ const calling_to_owner = async (req, res) => {
         <Dial callerId="${from}"  hangupOnStar="false" endOnBridge="false">
           <Number statusCallbackEvent="completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">${to}</Number>
         </Dial>
+
+        <Say>Person B has disconnected. You can press 1 to leave a message, or hang up.</Say>
+        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/handle_input" method="POST">
+          <Say>Please enter a digit now.</Say>
+        </Gather>
+        
       </Response>`;
 
     console.log("calling initiated");
@@ -272,7 +278,6 @@ const connect_call = (req, res) => {
 
   // dialing owner number
   res.send(`
-    
     <Response>
       <Say>Dialing now. Please wait</Say>
       <Dial>
@@ -284,11 +289,12 @@ const connect_call = (req, res) => {
 
 const bridge_end = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
-  console.log("\n\n\n\n\nbridge_end");
+
+  console.log("\n\n\n\n\nbridge_end", req.body);
   res.send(`
     <Response>
 <Say>The call has ended. Please press a digit to authorize Person A.</Say>
-<Gather action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" numDigits="1">
+<Gather action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" numDigits="1" timeout="50">
 <Say>Press a digit now.</Say>
 </Gather>
 </Response>

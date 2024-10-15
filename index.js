@@ -6,6 +6,8 @@ const app = express();
 const port = process.env.PORT || 3003;
 const { webSocketServers, callSocketServers } = require("./controllers"); // Import webSocketServers
 
+app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(
   cors({
     origin: "*",

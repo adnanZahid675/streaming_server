@@ -284,8 +284,9 @@ const bridge_end = async (req, res) => {
   console.log("\n\n\n\n\nbridge_end", req.body);
 
   res.send(`
+    <?xml version="1.0" encoding="UTF-8"?>
     <Response>
-    <Say>Bridge end To authorize Person A, please press 1.</Say>
+    <Say>Bridge end Bridge end Bridge end  please press 1.</Say>
     <Gather numDigits="1" method="POST"/>
     </Response>
   `);

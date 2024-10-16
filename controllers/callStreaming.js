@@ -251,7 +251,7 @@ const calling_to_owner = async (req, res) => {
     <?xml version="1.0" encoding="UTF-8"?>
      <Response>
         <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}" DialCallStatus="completed" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">
+        <Dial callerId="${from}" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">
           <Number statusCallbackEvent="completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">${to}</Number>
         </Dial>
       </Response>`;

@@ -65,6 +65,7 @@ const getConferenceStreaming = async (req, res) => {
   });
   res.status(200).json({ message: "Processing your request" });
   try {
+
     const call = await client.dialPhone({
       from: `${from}`,
       to: `${to}`,
@@ -74,7 +75,7 @@ const getConferenceStreaming = async (req, res) => {
     console.log("call voptions", call?.options?.payload?.call_id);
 
     if (call?.options?.payload?.call_id) {
-      sendPostRequestWithOnCall(url, call_id);
+      // sendPostRequestWithOnCall(url, call_id);
     }
     call.on("call.state", (newState) => {
       if (newState === "ended") {
@@ -282,8 +283,8 @@ const bridge_end = async (req, res) => {
   const from = req.body.From; // Person A
   const to = req.body.To; // Person B
 
-  console.log("\n\n\n\nreq.body",req.body);
-  
+  console.log("\n\n\n\nreq.body", req.body);
+
   console.log(
     "Bridge ended. Call status:",
     callStatus,
@@ -331,7 +332,7 @@ const bridge_end = async (req, res) => {
 
 const status_call_back = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
-  console.log("\n\n\n\n\nstatus_call_back ended ",req.body);
+  console.log("\n\n\n\n\nstatus_call_back ended ", req.body);
   res.send(`
     <Response>
       <Say>In the status call back To authorize Person A please press 1.</Say>

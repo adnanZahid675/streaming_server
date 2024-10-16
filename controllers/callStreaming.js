@@ -284,6 +284,8 @@ const bridge_end = async (req, res) => {
   const from = req.body.From; // Person A
   const to = req.body.To; // Person B
 
+  console.log("\n\n\n\nreq.body",req.body);
+  
   console.log(
     "Bridge ended. Call status:",
     callStatus,

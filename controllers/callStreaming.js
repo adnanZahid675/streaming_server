@@ -42,7 +42,7 @@ request = 0;
 const getConferenceStreaming = async (req, res) => {
   console.log("\n\nrequest call log", request++);
   console.log("req?.body", req?.body);
-  console.log("\n\n\ncomplete req", req);
+  // console.log("\n\n\ncomplete req", req);
   console.log("\n\n\n\n\n\n\n");
 
   const { from, to, url, call_id } = req?.body;
@@ -117,7 +117,7 @@ const getConferenceStreaming = async (req, res) => {
       console.log("\n\n\ncollect.failed", collect.reason);
     });
   } catch (error) {
-    console.log("\n\n\n\ngot error in catch section ", error);
+    console.log("\n\n\n\ngot error in catch section ", error,"\n\n\n\n\n\n");
   }
   // const { digits } = await collectDigits.ended();
   // console.log("digits: ", digits);

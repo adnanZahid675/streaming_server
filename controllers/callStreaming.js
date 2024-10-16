@@ -248,7 +248,6 @@ const calling_to_owner = async (req, res) => {
     console.log("going to create a bridge between guest and owner");
 
     const responseXML = `
-    <?xml version="1.0" encoding="UTF-8"?>
      <Response>
         <Say>Connecting you to Person B now.</Say>
         <Dial callerId="${from}" action="https://myautogate.signalwire.com/laml-bins/167f2bfc-4e6a-4414-ac07-7b25a437fc48" hangupOnStar="false" endOnBridge="false">

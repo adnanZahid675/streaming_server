@@ -248,6 +248,7 @@ const calling_to_owner = async (req, res) => {
     console.log("going to create a bridge between guest and owner");
 
     const responseXML = `
+    <?xml version="1.0" encoding="UTF-8"?>
      <Response>
         <Say>Connecting you to Person B now.</Say>
         <Dial callerId="${from}" action="https://myautogate.signalwire.com/laml-bins/167f2bfc-4e6a-4414-ac07-7b25a437fc48" hangupOnStar="false" endOnBridge="false">
@@ -284,9 +285,10 @@ const bridge_end = async (req, res) => {
   console.log("\n\n\n\n\nbridge_end", req.body);
 
   res.send(`
+    <?xml version="1.0" encoding="UTF-8"?>
     <Response>
-      <Say>Thank you for the call. To authorize Person A, please press 1.</Say>
-      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST"/>
+    <Say>Bridge end To authorize Person A, please press 1.</Say>
+    <Gather numDigits="1" method="POST"/>
     </Response>
   `);
 };
@@ -295,8 +297,9 @@ const status_call_back = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
   console.log("\n\n\n\n\nstatus_call_back ended ");
   res.send(`
+    <?xml version="1.0" encoding="UTF-8"?>
     <Response>
-      <Say>Thank you for the call. To authorize Person A, please press 1.</Say>
+      <Say>In the status call back To authorize Person A please press 1.</Say>
       <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST"/>
     </Response>
   `);

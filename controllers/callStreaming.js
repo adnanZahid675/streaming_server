@@ -251,8 +251,8 @@ const calling_to_owner = async (req, res) => {
     <?xml version="1.0" encoding="UTF-8"?>
      <Response>
         <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}" action="https://myautogate.signalwire.com/laml-bins/167f2bfc-4e6a-4414-ac07-7b25a437fc48" hangupOnStar="false" endOnBridge="false">
-          <Number statusCallbackEvent="completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">${to}</Number>
+        <Dial callerId="${from}" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end" hangupOnStar="false" endOnBridge="false">
+          <Number>${to}</Number>
         </Dial>
       </Response>`;
 

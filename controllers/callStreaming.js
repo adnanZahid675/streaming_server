@@ -238,9 +238,6 @@ const initialGreetings = async (req, res) => {
 };
 
 const calling_to_owner = async (req, res) => {
-  console.log("\n\n\nreq", req.body, "\n\n\n\n\n\n\n\\n\n");
-  console.log("\n\n\nreq.body", req.body);
-
   const digit = req.body.Digits;
   console.log("digits from guest", digit);
 
@@ -253,7 +250,7 @@ const calling_to_owner = async (req, res) => {
     const responseXML = `
      <Response>
         <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}"  hangupOnStar="false" endOnBridge="false">
+        <Dial callerId="${from}" action="https://myautogate.signalwire.com/laml-bins/167f2bfc-4e6a-4414-ac07-7b25a437fc48" hangupOnStar="false" endOnBridge="false">
           <Number statusCallbackEvent="completed" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end">${to}</Number>
         </Dial>
       </Response>`;
@@ -276,7 +273,7 @@ const connect_call = (req, res) => {
     <Response>
       <Say>Dialing now. Please wait</Say>
       <Dial>
-        <Number>+1834356935</Number>
+        <Number>+18334356935</Number>
       </Dial>
     </Response>
   `);
@@ -284,28 +281,14 @@ const connect_call = (req, res) => {
 
 const bridge_end = async (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
-
   console.log("\n\n\n\n\nbridge_end", req.body);
 
-  to = "+12019716175"; // signal wire
-  from = "+18334356935"; // owner number
-
-  const call = await client.calls.create({
-    from: from, // The SignalWire number that Person A called
-    to: to, // The phone number of Person B
-    // statusCallback:
-    //   "https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back",
-  });
-
-  console.log("created");
-
-  // res.send(`
-  //   <Response>
-  //     <Dial >
-  //       <Number>+18334356935</Number>
-  //     </Dial>
-  //   </Response>
-  // `);
+  res.send(`
+    <Response>
+      <Say>Thank you for the call. To authorize Person A, please press 1.</Say>
+      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST"/>
+    </Response>
+  `);
 };
 
 const status_call_back = (req, res) => {

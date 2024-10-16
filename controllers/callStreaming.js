@@ -311,7 +311,10 @@ const bridge_end = async (req, res) => {
     res.set("Content-Type", "text/xml");
     res.send(responseXML); // Ask Person B for authorization
   } else {
-    res.send("<Response><Say>Goodbye.</Say></Response>");
+    res.send(` <Response>
+        <Say>else part else part press 1</Say>
+        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" timeout="10"/>
+      </Response>`);
   }
 };
 

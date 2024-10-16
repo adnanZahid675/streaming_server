@@ -280,17 +280,51 @@ const connect_call = (req, res) => {
 };
 
 const bridge_end = async (req, res) => {
-  // Respond with LaML to dial Person B and bridge the call
-  console.log("\n\n\n\n\nbridge_end", req.body);
+  const callStatus = req.body.DialCallStatus;
+  const from = req.body.From; // Person A
+  const to = req.body.To; // Person B
 
-  res.send(`
-    <?xml version="1.0" encoding="UTF-8"?>
-    <Response>
-    <Say>Bridge end Bridge end Bridge end  please press 1.</Say>
-    <Gather numDigits="1" method="POST"/>
-    </Response>
-  `);
+  console.log(
+    "Bridge ended. Call status:",
+    callStatus,
+    "From:",
+    from,
+    "To:",
+    to
+  );
+
+  if (callStatus === "completed" && to === "+18334356935") {
+    // Ensure this is for Person B
+    // Send a prompt to Person B for authorization
+    const responseXML = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <Response>
+        <Say>Thank you for the call. Please authorize Person A by pressing 1.</Say>
+        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/authorization" method="POST" timeout="10"/>
+      </Response>
+    `;
+
+    console.log("Prompting Person B for authorization");
+
+    res.set("Content-Type", "text/xml");
+    res.send(responseXML); // Ask Person B for authorization
+  } else {
+    res.send("<Response><Say>Goodbye.</Say></Response>");
+  }
 };
+
+// const bridge_end = async (req, res) => {
+//   // Respond with LaML to dial Person B and bridge the call
+//   console.log("\n\n\n\n\nbridge_end", req.body);
+
+//   res.send(`
+//     <?xml version="1.0" encoding="UTF-8"?>
+//     <Response>
+//     <Say>Bridge end Bridge end Bridge end  please press 1.</Say>
+//     <Gather numDigits="1" method="POST"/>
+//     </Response>
+//   `);
+// };
 
 const status_call_back = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call

@@ -65,7 +65,6 @@ const getConferenceStreaming = async (req, res) => {
   });
   res.status(200).json({ message: "Processing your request" });
   try {
-
     const call = await client.dialPhone({
       from: `${from}`,
       to: `${to}`,
@@ -92,7 +91,7 @@ const getConferenceStreaming = async (req, res) => {
     });
 
     call.on("collect.started", (collect) => {
-      console.log("\n\n\ncollect.started", collect);
+      console.log("\n\n\ncollect.started", collect, "\n\n\n");
     });
     call.on("collect.startOfInput", (collect) => {
       console.log("\n\n\nInput collection started.");
@@ -117,7 +116,7 @@ const getConferenceStreaming = async (req, res) => {
       console.log("\n\n\ncollect.failed", collect.reason);
     });
   } catch (error) {
-    console.log("\n\n\n\ngot error in catch section ", error,"\n\n\n\n\n\n");
+    console.log("\n\n\n\ngot error in catch section ", error, "\n\n\n\n\n\n");
   }
   // const { digits } = await collectDigits.ended();
   // console.log("digits: ", digits);
@@ -183,7 +182,7 @@ async function streamConnected(call_id) {
       `https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php?callId=${call_id}`
     );
 
-    console.log("\n\n\n got responseL ", resp);
+    console.log("\n\n\n got responseL ", resp?.data);
     resp;
   } catch (error) {
     console.error(
@@ -201,12 +200,13 @@ async function sendDTMFEvent(digit, call_id) {
   };
   try {
     console.log("payload\n\n\n\n", payload);
-    await axios.post(
+    const data = await axios.post(
       "https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php",
       {
         payload,
       }
     );
+    console.log(data.data);
   } catch (error) {
     console.error("Error sending axios POST request:", JSON.stringify(error));
   }

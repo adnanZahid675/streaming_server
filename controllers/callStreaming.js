@@ -74,7 +74,7 @@ const getConferenceStreaming = async (req, res) => {
     console.log("call voptions", call?.options?.payload?.call_id);
 
     if (call?.options?.payload?.call_id) {
-      // sendPostRequestWithOnCall(url, call_id);
+      sendPostRequestWithOnCall(url, call_id);
     }
     call.on("call.state", (newState) => {
       if (newState === "ended") {
@@ -218,7 +218,6 @@ async function sendPostRequestWithOnCall(url, call_id) {
       call_id,
     };
     const response = await axios.get(url, payload);
-    console.log("\n\ngot response : ", response);
   } catch (error) {
     console.error("Error sending axios POST request:", error);
   }

@@ -118,8 +118,7 @@ const getConferenceStreaming = async (req, res) => {
   } catch (error) {
     console.log("\n\n\n\ngot error in catch section ", error, "\n\n\n\n\n\n");
   }
-  // const { digits } = await collectDigits.ended();
-  // console.log("digits: ", digits);
+
 };
 
 const checkDigits = (req, res) => {
@@ -206,9 +205,9 @@ async function sendDTMFEvent(digit, call_id) {
         payload,
       }
     );
-    console.log(data.data);
+    console.log("\n\nDTMF response",data);
   } catch (error) {
-    console.error("Error sending axios POST request:", JSON.stringify(error));
+    console.error("Error in sending DTMF :", JSON.stringify(error));
   }
 }
 
@@ -344,16 +343,7 @@ const process_authorization = (req, res) => {
   const digit = req.body.Digits;
   console.log("\n\n\n\n\n\n\n\ngot digit from the owner", digit);
   if (digit == "1") {
-    // Send an SMS to Person A to confirm authorization
-    // const messaging = new signalwire.messaging({
-    //   from: "+YourSignalWireNumber",
-    //   to: "+PersonAPhoneNumber",
-    //   body: "You have been authorized by Person B!",
-    // });
-
-    // messaging.create(); // Send the SMS
-
-    res.send(
+   res.send(
       "<Response><Say>Thank you, Person A has been authorized.</Say></Response>"
     );
   } else {

@@ -193,7 +193,7 @@ async function streamConnected(call_id) {
 async function sendDTMFEvent(digit, call_id) {
   try {
     const data = await axios.get(
-      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php?digit=${digit?.dtmf?.digit}?call_id=${call_id}`
+      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php?digit=${digit?.dtmf?.digit}&call_id=${call_id}`
     );
     console.log("\n\nDTMF response", data);
   } catch (error) {

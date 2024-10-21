@@ -153,7 +153,7 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data);
       }
       if (data.event === "dtmf") {
-        // sendDTMFEvent(data, conf_sid);
+        sendDTMFEvent(data, conf_sid);
         console.log("\n\n\n\n\n\n\n\n\n\ndtmf event got: ", data);
       }
       if (data.event === "stop") {

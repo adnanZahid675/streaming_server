@@ -141,12 +141,11 @@ const getCallStreaming = (req, res) => {
   callSocketServers[conf_sid] = callSocket;
 
   callSocketServers[conf_sid].on("connection", (ws) => {
-    streamConnected(conf_sid);
+    // streamConnected(conf_sid);
     ws.on("message", async (message) => {
       const data = JSON.parse(message);
       if (data.event === "connected") {
         console.log("Connected now:", data);
-        create_call_app(conf_sid);
       }
       if (data.event === "start") {
         console.log("Started now:", data);

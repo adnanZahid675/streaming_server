@@ -174,45 +174,65 @@ const getCallStreaming = (req, res) => {
   });
 };
 
+// async function create_call_app(conf_id) {
+//   console.log("Creating call for conference ID:", conf_id);
+
+//   const account_sid = "93d5b1c7-b843-49e8-be85-b9882c51524d";
+//   const spaceUrl = "myautogate.signalwire.com";
+//   const fromNumber = "+18016506700"; // Your SignalWire number
+//   const toSipUri = `sip:myautogate-conference.dapp.signalwire.com`; // Your SIP URI
+//   const url = `https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization?conf_id=${conf_id}`; // Your callback URL
+
+//   try {
+//     let config = {
+//       method: "post",
+//       maxBodyLength: Infinity,
+//       url: `https://${spaceUrl}/api/laml/2010-04-01/Accounts/${account_sid}/Calls`,
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//         Accept: "application/json",
+//       },
+//       data: new URLSearchParams({
+//         From: fromNumber,
+//         To: toSipUri,
+//         Url: url,
+//         FallbackUrl: url, // You can customize this if needed
+//       }).toString(),
+//     };
+
+//     const response = await axios.request(config);
+//     console.log("Call created successfully:", response.data);
+//   } catch (error) {
+//     if (error.response) {
+//       console.error("Error response from API:", error.response.data);
+//     } else {
+//       console.error("Error creating call:", error.message);
+//     }
+//   }
+// }
+
 async function create_call_app(conf_id) {
-  console.log("Creating call for conference ID:", conf_id);
-
-  const account_sid = "93d5b1c7-b843-49e8-be85-b9882c51524d";
-  const spaceUrl = "myautogate.signalwire.com";
-  const fromNumber = "+18016506700"; // Your SignalWire number
-  const toSipUri = `sip:myautogate-conference.dapp.signalwire.com`; // Your SIP URI
-  const url = `https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization?conf_id=${conf_id}`; // Your callback URL
-
+  console.log("creating call app", conf_id);
   try {
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: `https://${spaceUrl}/api/laml/2010-04-01/Accounts/${account_sid}/Calls`,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "application/json",
-      },
-      data: new URLSearchParams({
-        From: fromNumber,
-        To: toSipUri,
-        Url: url,
-        FallbackUrl: url, // You can customize this if needed
-      }).toString(),
-    };
-
-    const response = await axios.request(config);
-    console.log("Call created successfully:", response.data);
+    const call = await client.calls.create({
+      from: "+18016506700", // Your SignalWire number
+      to: "sip:myautogate-conference.dapp.signalwire.com",
+      twiml: `
+        <Response>
+          <Dial>
+            <Conference>MyConference_${conf_id}</Conference>
+          </Dial>
+        </Response>
+      `,
+    });
+    console.log("Call created:", call.sid);
   } catch (error) {
-    if (error.response) {
-      console.error("Error response from API:", error.response.data);
-    } else {
-      console.error("Error creating call:", error.message);
-    }
+    console.error("Error creating call:", error);
   }
 }
 
 const process_authorization = (req, res) => {
-  console.log("\n\n\n\n\nreq?.query?", req.query);
+  console.log("\n\n\n\n\nreq?.query?".req?.query);
   const conf_id = req?.query?.conf_id;
   res.send(
     `

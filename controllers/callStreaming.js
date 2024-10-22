@@ -189,7 +189,7 @@ async function create_call_app(conf_id) {
 }
 
 const process_authorization = (req, res) => {
-  console.log("\n\n\n\n\nreq?.query?".req?.query);
+  console.log("\n\n\n\n\nreq?.query?",req.query);
   const conf_id = req?.query?.conf_id;
   res.send(
     `

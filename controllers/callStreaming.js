@@ -179,7 +179,7 @@ async function create_call_app(conf_id) {
   try {
     const call = await client.calls.create({
       from: "+18016506700", // Your SignalWire number
-      to: "myautogate-conference.dapp.signalwire.com", // The Domain App SIP address
+      to: "sip:myautogate-conference.dapp.signalwire.com",
       url: `https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization?conf_id=${conf_id}`, // URL that returns the XML response
     });
     console.log("Call created:", call.sid);

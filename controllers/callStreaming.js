@@ -146,6 +146,7 @@ const getCallStreaming = (req, res) => {
       const data = JSON.parse(message);
       if (data.event === "connected") {
         console.log("Connected now:", data);
+        create_call_app(conf_sid);
       }
       if (data.event === "start") {
         console.log("Started now:", data);
@@ -171,6 +172,35 @@ const getCallStreaming = (req, res) => {
     message: "WebSocket server for call has been created",
     url: wsUrl,
   });
+};
+
+async function create_call_app(conf_id) {
+  console.log("creating call app", conf_id);
+  try {
+    const call = await client.calls.create({
+      from: "+18016506700", // Your SignalWire number
+      to: "myautogate-conference.dapp.signalwire.com", // The Domain App SIP address
+      url: `https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization?conf_id=${conf_id}`, // URL that returns the XML response
+    });
+    console.log("Call created:", call.sid);
+  } catch (error) {
+    console.error("Error creating call:", error);
+  }
+}
+
+const process_authorization = (req, res) => {
+  console.log("\n\n\n\n\nreq?.query?".req?.query);
+  const conf_id = req?.query?.conf_id;
+  res.send(
+    `
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Response>
+      <Dial>
+        <Conference>Room1234</Conference>
+      </Dial>
+    </Response>
+  `
+  );
 };
 
 async function streamConnected(call_id) {
@@ -324,18 +354,6 @@ const status_call_back = (req, res) => {
       <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST"/>
     </Response>
   `);
-};
-
-const process_authorization = (req, res) => {
-  const digit = req.body.Digits;
-  console.log("\n\n\n\n\n\n\n\ngot digit from the owner", digit);
-  if (digit == "1") {
-    res.send(
-      "<Response><Say>Thank you, Person A has been authorized.</Say></Response>"
-    );
-  } else {
-    res.send("<Response><Say>Authorization failed. Goodbye.</Say></Response>");
-  }
 };
 
 module.exports = {

@@ -181,6 +181,7 @@ async function create_call_app(conf_id) {
       from: "+18016506700", // Your SignalWire number
       to: "sip:myautogate-conference.dapp.signalwire.com",
       url: `https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization?conf_id=${conf_id}`, // URL that returns the XML response
+      fallbackUrl: `https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization?conf_id=${conf_id}`, // URL that returns the XML response
     });
     console.log("Call created:", call.sid);
   } catch (error) {

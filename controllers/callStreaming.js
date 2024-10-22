@@ -177,11 +177,10 @@ async function streamConnected(call_id) {
   console.log("callId L: ", call_id);
   try {
     const resp = await axios.get(
-      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php?callId=${call_id}`
+      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php?call_id=${call_id}`
     );
 
     console.log("\n\n\n got responseL ", resp?.data);
-    resp;
   } catch (error) {
     console.error(
       "\n\n\n\n\n\nError sending axios POST request:",
@@ -195,7 +194,7 @@ async function sendDTMFEvent(digit, call_id) {
     const data = await axios.get(
       `https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php?digit=${digit?.dtmf?.digit}&call_id=${call_id}`
     );
-    console.log("\n\nDTMF response", data);
+    console.log("\n\nDTMF response", data.data);
   } catch (error) {
     console.error("Error in sending DTMF :", JSON.stringify(error));
   }
@@ -215,13 +214,11 @@ async function sendPostRequestWithOnCall(url, call_id) {
 // calling function is starting from here on
 
 const initialGreetings = async (req, res) => {
-  console.log("\n\n\ngreeting");
-
   const responseXML = `
           <Response>
-  <Say> Hello, please press 1 if you want to continue the call. </Say>
-  <Gather numDigits="1" action='https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner' method='POST' timeout='10'/>
-</Response>`;
+            <Say> Hello, please press 1 if you want to continue the call. </Say>
+            <Gather numDigits="1" action='https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner' method='POST' timeout='10'/>
+          </Response>`;
 
   res.send(responseXML);
 };

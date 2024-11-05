@@ -130,8 +130,10 @@ const checkDigits = (req, res) => {
 };
 
 const getCallStreaming = (req, res) => {
-  const conf_sid = req?.query?.conf_sid;
+  const conf_sid = req?.body?.conf_sid;
+  const dtmf_url = req?.body?.dtmf_url;
   console.log("\nconf_sid: ", conf_sid);
+  console.log("\ndtmf_url: ", dtmf_url);
   if (!conf_sid) {
     res.status(400).json({ message: "Conference sid not found" });
     return;
@@ -151,7 +153,7 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data);
       }
       if (data.event === "dtmf") {
-        sendDTMFEvent(data, conf_sid);
+        sendDTMFEvent(data, conf_sid,dtmf_url);
         console.log("\n\n\n\n\n\n\n\n\n\ndtmf event got: ", data);
       }
       if (data.event === "stop") {
@@ -173,42 +175,34 @@ const getCallStreaming = (req, res) => {
   });
 };
 
-// async function create_call_app(conf_id) {
-//   console.log("Creating call for conference ID:", conf_id);
+async function streamConnected(call_id) {
+  console.log("callId L: ", call_id);
+  try {
+    const resp = await axios.get(
+      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php?call_id=${call_id}`
+    );
 
-//   const account_sid = "93d5b1c7-b843-49e8-be85-b9882c51524d";
-//   const spaceUrl = "myautogate.signalwire.com";
-//   const fromNumber = "+18016506700"; // Your SignalWire number
-//   const toSipUri = `sip:myautogate-conference.dapp.signalwire.com`; // Your SIP URI
-//   const url = `https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization?conf_id=${conf_id}`; // Your callback URL
+    console.log("\n\n\n got responseL ", resp?.data);
+  } catch (error) {
+    console.error(
+      "\n\n\n\n\n\nError sending axios POST request:",
+      error?.message
+    );
+  }
+}
 
-//   try {
-//     let config = {
-//       method: "post",
-//       maxBodyLength: Infinity,
-//       url: `https://${spaceUrl}/api/laml/2010-04-01/Accounts/${account_sid}/Calls`,
-//       headers: {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//         Accept: "application/json",
-//       },
-//       data: new URLSearchParams({
-//         From: fromNumber,
-//         To: toSipUri,
-//         Url: url,
-//         FallbackUrl: url, // You can customize this if needed
-//       }).toString(),
-//     };
+async function sendDTMFEvent(digit, call_id,dtmf_url) {
+  try {
+    const data = await axios.get(
+      `${dtmf_url}?digit=${digit?.dtmf?.digit}&call_id=${call_id}`
+    );
+    console.log("\n\nDTMF response", data.data);
+  } catch (error) {
+    console.error("Error in sending DTMF :", JSON.stringify(error));
+  }
+}
 
-//     const response = await axios.request(config);
-//     console.log("Call created successfully:", response.data);
-//   } catch (error) {
-//     if (error.response) {
-//       console.error("Error response from API:", error.response.data);
-//     } else {
-//       console.error("Error creating call:", error.message);
-//     }
-//   }
-// }
+
 
 async function create_call_app(conf_id) {
   console.log("creating call app", conf_id);
@@ -244,33 +238,6 @@ const process_authorization = (req, res) => {
   `
   );
 };
-
-async function streamConnected(call_id) {
-  console.log("callId L: ", call_id);
-  try {
-    const resp = await axios.get(
-      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php?call_id=${call_id}`
-    );
-
-    console.log("\n\n\n got responseL ", resp?.data);
-  } catch (error) {
-    console.error(
-      "\n\n\n\n\n\nError sending axios POST request:",
-      error?.message
-    );
-  }
-}
-
-async function sendDTMFEvent(digit, call_id) {
-  try {
-    const data = await axios.get(
-      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_dtmf_event.php?digit=${digit?.dtmf?.digit}&call_id=${call_id}`
-    );
-    console.log("\n\nDTMF response", data.data);
-  } catch (error) {
-    console.error("Error in sending DTMF :", JSON.stringify(error));
-  }
-}
 
 async function sendPostRequestWithOnCall(url, call_id) {
   try {

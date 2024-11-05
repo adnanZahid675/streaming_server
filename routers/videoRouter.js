@@ -20,7 +20,7 @@ const {
 // Define your API endpoint here
 router.get("/record-list", getVideoCTRL);
 router.get("/streaming", getStreaming);
-router.get("/callStreaming", getCallStreaming);
+router.post("/callStreaming", getCallStreaming);
 router.post("/conference", getConferenceStreaming);
 router.get("/dialCall", dialAndAddToConference);
 router.get("/checkDigits", checkDigits);

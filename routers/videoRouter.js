@@ -21,6 +21,8 @@ const {
 router.get("/record-list", getVideoCTRL);
 router.get("/streaming", getStreaming);
 router.post("/callStreaming", getCallStreaming);
+
+
 router.post("/conference", getConferenceStreaming);
 router.get("/dialCall", dialAndAddToConference);
 router.get("/checkDigits", checkDigits);

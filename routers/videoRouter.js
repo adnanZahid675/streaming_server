@@ -15,12 +15,13 @@ const {
   initialGreetings,
   bridge_end,
 } = require("../controllers");
-// const { getCallStreaming } = require("../controllers/callStreaming");
+
+const authMiddleware = require('./../middleware/auth_check');
 
 // Define your API endpoint here
 router.get("/record-list", getVideoCTRL);
-router.get("/streaming", getStreaming);
-router.post("/callStreaming", getCallStreaming);
+router.get("/streaming",authMiddleware,getStreaming);
+router.post("/callStreaming", authMiddleware,getCallStreaming);
 
 
 router.post("/conference", getConferenceStreaming);

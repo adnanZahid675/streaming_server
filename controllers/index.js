@@ -35,5 +35,5 @@ module.exports = {
   status_call_back,
   process_authorization,
   initialGreetings,
-  bridge_end
+  bridge_end,
 };

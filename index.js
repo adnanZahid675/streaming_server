@@ -5,6 +5,7 @@ require("dotenv").config();
 const app = express();
 const bodyParser = require('body-parser');
 const port = process.env.PORT || 3003;
+const connection = require("./config/db.config");
 const { webSocketServers, callSocketServers } = require("./controllers"); // Import webSocketServers
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -55,6 +56,8 @@ server.on("upgrade", (request, socket, head) => {
     socket.destroy();
   }
 });
+
+connection();
 
 server.listen(port, () => {
   console.log(`server logs checking 1`);

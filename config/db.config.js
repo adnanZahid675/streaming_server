@@ -19,7 +19,7 @@ async function connectMySQL() {
     return connection;
   } catch (err) {
     console.error("Database connection failed:", err.message);
-    throw err;
+    // throw err;
   }
 }
 

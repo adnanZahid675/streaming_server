@@ -68,6 +68,9 @@ function startFFmpeg(ws, ip, user, pass,uniqueId,port) {
 
 const getStreaming = (req, res) => {
   const { ip, user, pass,port } = req.query;
+
+  console.log("\n\n\n\n\n");
+  
   if (!ip || !user || !pass || !port) {
     return res.status(400).send("Missing IP, user,port or pass");
   }

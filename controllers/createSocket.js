@@ -88,6 +88,7 @@ const getStreaming = (req, res) => {
     const wsUrl = `ws://${req.headers.host}/record-list?id=${uniqueId}`;
     res.json({ message: "WebSocket server created", url: wsUrl });
   } catch (error) {
+    console.log("internal error : ",error);
     res.status(500).json({ message: "Internal server error" });
   }
 

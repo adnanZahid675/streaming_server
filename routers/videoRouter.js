@@ -21,6 +21,7 @@ const authMiddleware = require('./../middleware/auth_check');
 // Define your API endpoint here
 router.get("/record-list", getVideoCTRL);
 router.get("/streaming",authMiddleware,getStreaming);
+// router.get("/streaming",getStreaming);
 router.post("/callStreaming", authMiddleware,getCallStreaming);
 
 

@@ -5,7 +5,7 @@ const authMiddleware = async (req, res, next) => {
     // Check if Authorization header exists
     const token = req.headers["authorization"];
     if (!token) {
-      return res.status(401).json({ error: "Authorization token missing" });
+      return res.status(401).json({ error: "Unauthorized, token missing" });
     }
 
     // Get database connection
@@ -18,7 +18,7 @@ const authMiddleware = async (req, res, next) => {
     );
 
     if (rows.length === 0) {
-      return res.status(403).json({ error: "Invalid authorization token" });
+      return res.status(403).json({ error: "Invalid Unauthorized token" });
     }
 
     // Token is valid, proceed to the next middleware or route handler
@@ -26,7 +26,7 @@ const authMiddleware = async (req, res, next) => {
     next();
   } catch (err) {
     console.error("Error in authMiddleware:", err.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error,Unauthorized" });
   }
 };
 

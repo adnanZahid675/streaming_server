@@ -5,12 +5,13 @@ const { v4: uuidv4 } = require("uuid"); // Importing uuid
 
 let webSocketServers = {};
 
-function startFFmpeg(ws, ip, user, pass,uniqueId) {
+function startFFmpeg(ws, ip, user, pass,uniqueId,port) {
   const ffmpegArgs = [
     "-rtsp_transport",
     "tcp",
     "-i",
-    `rtsp://${user}:${pass}@${ip}:5554`,
+    // `rtsp://${user}:${pass}@${ip}:5554`,
+    `rtsp://${user}:${pass}@${ip}:${port}`,
     "-fflags",
     "nobuffer",
     "-rtbufsize",
@@ -18,7 +19,7 @@ function startFFmpeg(ws, ip, user, pass,uniqueId) {
     "-use_wallclock_as_timestamps",
     "1",
     "-s",
-    "640x360",
+    "540x360",
     "-fps_mode",
     "passthrough",
     "-copyts",
@@ -66,14 +67,15 @@ function startFFmpeg(ws, ip, user, pass,uniqueId) {
 }
 
 const getStreaming = (req, res) => {
-  const { ip, user, pass } = req.query;
-  if (!ip || !user || !pass) {
-    return res.status(400).send("Missing IP, user, or pass");
+  const { ip, user, pass,port } = req.query;
+  if (!ip || !user || !pass || !port) {
+    return res.status(400).send("Missing IP, user,port or pass");
   }
+
   const uniqueId = uuidv4();
   webSocketServers[uniqueId] = new WebSocket.Server({ noServer: true });
   webSocketServers[uniqueId].on("connection", (ws) => {
-    let ffmpeg = startFFmpeg(ws, ip, user, pass,uniqueId);
+    let ffmpeg = startFFmpeg(ws, ip, user, pass,uniqueId,port);
     ws.on("close", () => {
       if (ffmpeg) {
         ffmpeg.kill("SIGINT");

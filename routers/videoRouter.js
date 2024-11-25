@@ -22,7 +22,8 @@ const authMiddleware = require('./../middleware/auth_check');
 router.get("/record-list", getVideoCTRL);
 // router.get("/streaming",authMiddleware,getStreaming);
 router.get("/streaming",getStreaming);
-router.post("/callStreaming", authMiddleware,getCallStreaming);
+// router.post("/callStreaming", authMiddleware,getCallStreaming);
+router.post("/callStreaming", getCallStreaming); // creating it public because visitor is not logged in during the call
 
 
 router.post("/conference", getConferenceStreaming);

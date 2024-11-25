@@ -72,20 +72,25 @@ const getStreaming = (req, res) => {
     return res.status(400).send("Missing IP, user,port or pass");
   }
 
-  const uniqueId = uuidv4();
-  webSocketServers[uniqueId] = new WebSocket.Server({ noServer: true });
-  webSocketServers[uniqueId].on("connection", (ws) => {
-    let ffmpeg = startFFmpeg(ws, ip, user, pass,uniqueId,port);
-    ws.on("close", () => {
-      if (ffmpeg) {
-        ffmpeg.kill("SIGINT");
-        ffmpeg = null;
-      }
+  try {
+    const uniqueId = uuidv4();
+    webSocketServers[uniqueId] = new WebSocket.Server({ noServer: true });
+    webSocketServers[uniqueId].on("connection", (ws) => {
+      let ffmpeg = startFFmpeg(ws, ip, user, pass,uniqueId,port);
+      ws.on("close", () => {
+        if (ffmpeg) {
+          ffmpeg.kill("SIGINT");
+          ffmpeg = null;
+        }
+      });
     });
-  });
-  //    = wsServer;
-  const wsUrl = `ws://${req.headers.host}/record-list?id=${uniqueId}`;
-  res.json({ message: "WebSocket server created", url: wsUrl });
+    //    = wsServer;
+    const wsUrl = `ws://${req.headers.host}/record-list?id=${uniqueId}`;
+    res.json({ message: "WebSocket server created", url: wsUrl });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+
 };
 
 const closeAllSockets = (req, res) => {

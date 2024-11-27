@@ -8,8 +8,8 @@ async function connectMySQL() {
     // Create a connection to the MySQL database
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST || "localhost", // MySQL host
-      user: process.env.DB_USER || "root",      // MySQL username
-      password: process.env.DB_PASS || "",      // MySQL password
+      user: process.env.DB_USER || "SOMEUSER", //"root",      // MySQL username
+      password: process.env.DB_PASS || "SOME PASSWORD",      // MySQL password
       database: process.env.DB_NAME || "invisible"   // MySQL database name
     });
 

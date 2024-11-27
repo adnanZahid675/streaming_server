@@ -21,7 +21,7 @@ const authMiddleware = require('./../middleware/auth_check');
 // Define your API endpoint here
 router.get("/record-list", getVideoCTRL);
 router.get("/streaming",getStreaming);
-router.post("/callStreaming",authMiddleware, getCallStreaming); // creating it public because visitor is not logged in during the call
+router.post("/callStreaming", getCallStreaming); // creating it public because visitor is not logged in during the call
 
 
 router.post("/conference", getConferenceStreaming);

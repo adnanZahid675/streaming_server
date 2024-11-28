@@ -23,6 +23,10 @@ app.use(express.json());
 const apiRouter = require("./routers");
 app.use(apiRouter);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the Invisible App!");
+});
+
 const server = http.createServer(app);
 
 server.on("upgrade", (request, socket, head) => {

@@ -5,21 +5,18 @@ dotenv.config();
 
 async function connectMySQL() {
   try {
-    // Create a connection to the MySQL database
     const connection = await mysql.createConnection({
-      host: process.env.DB_HOST || "localhost", // MySQL host
-      user: process.env.DB_USER || "SOMEUSER", //"root",      // MySQL username
-      password: process.env.DB_PASS || "SOME PASSWORD",      // MySQL password
-      database: process.env.DB_NAME || "invisible"   // MySQL database name
+      host: process.env.DB_HOST || "127.0.0.1", // Default to local IP
+      user: process.env.DB_USER || "root",      // Default user
+      password: process.env.DB_PASS || "",      // Default password
+      database: process.env.DB_NAME || "invisible", // Default database
+      port: process.env.DB_PORT || 3306         // Default MySQL port
     });
 
     console.log("Database connected successfully!");
-
-    // You can now export the connection to use it in other files
     return connection;
   } catch (err) {
-    console.error("Database connection failed:", err.message);
-    // throw err;
+    console.error("Database connection failed:", err.stack || err.message);
   }
 }
 

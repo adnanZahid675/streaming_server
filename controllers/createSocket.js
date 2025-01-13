@@ -10,7 +10,6 @@ function startFFmpeg(ws, ip, user, pass,uniqueId,port) {
     "-rtsp_transport",
     "tcp",
     "-i",
-    // `rtsp://${user}:${pass}@${ip}:5554`,
     `rtsp://${user}:${pass}@${ip}:${port}`,
     "-fflags",
     "nobuffer",

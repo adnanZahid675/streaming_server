@@ -14,6 +14,8 @@ const {
   process_authorization,
   initialGreetings,
   bridge_end,
+  send_sms,
+  fetch_sms_status
 } = require("../controllers");
 
 const authMiddleware = require('./../middleware/auth_check');
@@ -35,6 +37,10 @@ router.post("/connect_call", connect_call);
 router.post("/status_call_back", status_call_back);
 router.post("/process_authorization", process_authorization);
 router.post("/bridge_end", bridge_end);
+
+
+router.post("/send_sms",send_sms);
+router.post("/fetch_sms_status",fetch_sms_status);
 
 module.exports = router;
 

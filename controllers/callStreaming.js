@@ -17,6 +17,8 @@ const client = new RestClient(
   }
 );
 
+const { SignalWire } = require("@signalwire/realtime-api");
+
 const dialAndAddToConference = async (req, res) => {
   try {
     const { from, to } = req?.query;
@@ -24,7 +26,7 @@ const dialAndAddToConference = async (req, res) => {
       res.status(400).json({ message: "Query params are not completed" });
       return;
     } else {
-      console.log("all querry params from to \n", from, to);
+      console.log("all query params from to \n", from, to);
     }
     res.status(200).json({ message: "Processing request" });
     const dialedCall = await consumer.client.calling.dial({
@@ -129,6 +131,38 @@ const checkDigits = (req, res) => {
   res.status(200).json({ digits: callResult[requestId] });
 };
 
+const send_sms = async (req, res) => {
+  try {
+    const { from_number, to_number, message_body } = req.body;
+    const sendResult = await client.messages.create({
+      from: from_number,
+      to: to_number,
+      body: message_body,
+    });
+    res.status(200).json({ success: true, message: sendResult });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: JSON.stringify(error),
+      error_message: error?.message,
+    });
+  }
+};
+
+const fetch_sms_status = async (req, res) => {
+  const { message_sid } = req.body;
+  try {
+    const messageStatus = await client.messages(message_sid).fetch();
+    res.status(200).json({ success: true, message: messageStatus });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error_message: error?.message,
+      error: JSON.stringify(error),
+    });
+  }
+};
+
 const getCallStreaming = (req, res) => {
   const conf_sid = req?.body?.conf_sid;
   const dtmf_url = req?.body?.dtmf_url;
@@ -153,8 +187,8 @@ const getCallStreaming = (req, res) => {
         console.log("Started now:", data);
       }
       if (data.event === "dtmf") {
-        sendDTMFEvent(data, conf_sid,dtmf_url);
-        console.log("\n\n\n\n\n\n\n\n\n\ndtmf event got: ", data);
+        sendDTMFEvent(data, conf_sid, dtmf_url);
+        console.log("\n\n\n\ndtmf event got: ", data);
       }
       if (data.event === "stop") {
         console.log("Call stopped"); // Logging the pressed digit
@@ -175,23 +209,7 @@ const getCallStreaming = (req, res) => {
   });
 };
 
-async function streamConnected(call_id) {
-  console.log("callId L: ", call_id);
-  try {
-    const resp = await axios.get(
-      `https://invisibletest.myagecam.net/invisible/signalwire_call/get_socket_response.php?call_id=${call_id}`
-    );
-
-    console.log("\n\n\n got responseL ", resp?.data);
-  } catch (error) {
-    console.error(
-      "\n\n\n\n\n\nError sending axios POST request:",
-      error?.message
-    );
-  }
-}
-
-async function sendDTMFEvent(digit, call_id,dtmf_url) {
+async function sendDTMFEvent(digit, call_id, dtmf_url) {
   try {
     const data = await axios.get(
       `${dtmf_url}?digit=${digit?.dtmf?.digit}&call_id=${call_id}`
@@ -201,8 +219,6 @@ async function sendDTMFEvent(digit, call_id,dtmf_url) {
     console.error("Error in sending DTMF :", JSON.stringify(error));
   }
 }
-
-
 
 async function create_call_app(conf_id) {
   console.log("creating call app", conf_id);
@@ -341,19 +357,6 @@ const bridge_end = async (req, res) => {
   }
 };
 
-// const bridge_end = async (req, res) => {
-//   // Respond with LaML to dial Person B and bridge the call
-//   console.log("\n\n\n\n\nbridge_end", req.body);
-
-//   res.send(`
-//     <?xml version="1.0" encoding="UTF-8"?>
-//     <Response>
-//     <Say>Bridge end Bridge end Bridge end  please press 1.</Say>
-//     <Gather numDigits="1" method="POST"/>
-//     </Response>
-//   `);
-// };
-
 const status_call_back = (req, res) => {
   // Respond with LaML to dial Person B and bridge the call
   console.log("\n\n\n\n\nstatus_call_back ended ", req.body);
@@ -379,4 +382,6 @@ module.exports = {
   process_authorization,
   initialGreetings,
   bridge_end,
+  send_sms,
+  fetch_sms_status,
 };

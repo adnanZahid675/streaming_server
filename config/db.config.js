@@ -6,12 +6,10 @@ dotenv.config();
 async function connectMySQL() {
   try {
 
-    console.log("all configs",process.env.DB_HOST,process.env.DB_USER );
-    
     const connection = await mysql.createConnection({
       host: "127.0.0.1", // Default to local IP
       user: "root", // Default user
-      password: "5drYHiltWQt7bQT", // Default password
+      password: "", // Default password
       database: "invisible", // Default database
       port: 3306, // Default MySQL port
     });

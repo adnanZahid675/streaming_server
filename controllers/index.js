@@ -16,6 +16,8 @@ const {
   process_authorization,
   initialGreetings,
   bridge_end,
+  send_sms,
+  fetch_sms_status
 } = require("./callStreaming");
 
 module.exports = {
@@ -36,4 +38,6 @@ module.exports = {
   process_authorization,
   initialGreetings,
   bridge_end,
+  send_sms,
+  fetch_sms_status
 };

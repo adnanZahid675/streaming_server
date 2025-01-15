@@ -195,9 +195,7 @@ const handle_incoming_sms = async (req, res) => {
     // Respond with a LaML response (optional)
     res.set("Content-Type", "text/xml");
     res.send(`
-        <Response>
-            <Message>Thank you for your message!</Message>
-        </Response>
+        <Response></Response>
     `);
   } catch (error) {
     console.log("JSON.stringify(error)",JSON.stringify(error));

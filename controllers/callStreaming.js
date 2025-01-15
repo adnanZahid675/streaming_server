@@ -139,6 +139,9 @@ const send_sms = async (req, res) => {
       to: to_number,
       body: message_body,
     });
+    // const callSocket = new WebSocket.Server({ noServer: true });
+    // callSocketServers[conf_sid] = callSocket;
+    // const wsUrl = `wss://${req.headers.host}/callStreaming?call_sid=${conf_sid}`;
     res.status(200).json({ success: true, message: sendResult });
   } catch (error) {
     res.status(500).json({
@@ -149,12 +152,57 @@ const send_sms = async (req, res) => {
   }
 };
 
+function setSocket() {
+  callSocketServers[conf_sid].on("connection", (ws) => {
+    ws.on("message", async (message) => {
+      const data = JSON.parse(message);
+      if (data.event === "connected") {
+        console.log("Connected now:", data);
+      }
+      ws.send(`Server response: ${message}`);
+    });
+    ws.on("close", () => {
+      console.log("Client disconnected");
+    });
+    ws.on("error", (error) => {
+      console.error(`WebSocket error: ${error}`);
+    });
+  });
+}
+
 const fetch_sms_status = async (req, res) => {
   const { message_sid } = req.body;
   try {
     const messageStatus = await client.messages(message_sid).fetch();
     res.status(200).json({ success: true, message: messageStatus });
   } catch (error) {
+    res.status(500).json({
+      success: false,
+      error_message: error?.message,
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+const handle_incoming_sms = async (req, res) => {
+  console.log("\n\n\n\nreq.bodyreq.bodyreq.bodyreq.bodyreq.body", req.body);
+  try {
+    const { From, To, Body } = req.body;
+    console.log(`Message received from ${From}`);
+    console.log(`To: ${To}`);
+    console.log(`Message body: ${Body}`);
+
+    // Respond with a LaML response (optional)
+    res.set("Content-Type", "text/xml");
+    res.send(`
+        <Response>
+            <Message>Thank you for your message!</Message>
+        </Response>
+    `);
+  } catch (error) {
+    console.log("JSON.stringify(error)",JSON.stringify(error));
+    console.log("error?.message",error?.message);
+
     res.status(500).json({
       success: false,
       error_message: error?.message,
@@ -384,4 +432,5 @@ module.exports = {
   bridge_end,
   send_sms,
   fetch_sms_status,
+  handle_incoming_sms
 };

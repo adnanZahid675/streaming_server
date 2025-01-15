@@ -17,7 +17,8 @@ const {
   initialGreetings,
   bridge_end,
   send_sms,
-  fetch_sms_status
+  fetch_sms_status,
+  handle_incoming_sms
 } = require("./callStreaming");
 
 module.exports = {
@@ -39,5 +40,6 @@ module.exports = {
   initialGreetings,
   bridge_end,
   send_sms,
-  fetch_sms_status
+  fetch_sms_status,
+  handle_incoming_sms
 };

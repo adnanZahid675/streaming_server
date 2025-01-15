@@ -15,7 +15,8 @@ const {
   initialGreetings,
   bridge_end,
   send_sms,
-  fetch_sms_status
+  fetch_sms_status,
+  handle_incoming_sms
 } = require("../controllers");
 
 const authMiddleware = require('./../middleware/auth_check');
@@ -41,6 +42,7 @@ router.post("/bridge_end", bridge_end);
 
 router.post("/send_sms",send_sms);
 router.post("/fetch_sms_status",fetch_sms_status);
+router.post("/handle_incoming_sms",handle_incoming_sms);
 
 module.exports = router;
 

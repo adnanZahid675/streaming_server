@@ -30,7 +30,6 @@ app.get("/", (req, res) => {
 const server = http.createServer(app);
 
 server.on("upgrade", (request, socket, head) => {
-  console.log("request.url", request.url);
   if (request.url.includes("callStreaming")) {
     const call_sid = new URL(
       request.url,
@@ -42,7 +41,6 @@ server.on("upgrade", (request, socket, head) => {
         callSocketServers[call_sid].emit("connection", ws, request);
       });
     } else {
-      console.log("not get the socket", call_sid);
       socket.destroy();
     }
     return;

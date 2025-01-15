@@ -39,7 +39,6 @@ router.post("/status_call_back", status_call_back);
 router.post("/process_authorization", process_authorization);
 router.post("/bridge_end", bridge_end);
 
-
 router.post("/send_sms",send_sms);
 router.post("/fetch_sms_status",fetch_sms_status);
 router.post("/handle_incoming_sms",handle_incoming_sms);

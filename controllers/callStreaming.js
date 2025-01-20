@@ -3,6 +3,10 @@ const { Voice } = require("@signalwire/realtime-api");
 const WebSocket = require("ws");
 let callSocketServers = {};
 let callResult = {};
+let latestMessageData = {
+  message: null,
+  timestamp: null,
+};
 const axios = require("axios");
 const { response } = require("express");
 
@@ -166,6 +170,19 @@ function setSocket(sms_sid) {
     ws.on("error", (error) => {
       console.error(`WebSocket error: ${error}`);
     });
+
+    ws.on("connection", (client) => {
+      const MESSAGE_EXPIRATION_TIME = 5000; // 5 seconds
+      if (latestMessageData.message && latestMessageData.timestamp) {
+        const currentTime = Date.now();
+        if ((currentTime - latestMessageData.timestamp) <= MESSAGE_EXPIRATION_TIME) {
+          client.send(JSON.stringify(latestMessageData.message));
+        }else{
+          console.log("\n\nlatest time ",latestMessageData.timestamp);
+          
+        }
+      }
+    });
   });
 }
 
@@ -173,13 +190,13 @@ const fetch_sms_status = async (req, res) => {
   const { message_sid } = req.body;
   try {
     const messageStatus = await client.messages(message_sid).fetch();
-    let wsUrl='';
+    let wsUrl = "";
 
     const message_status = messageStatus?.status?.toLowerCase();
-    console.log("message_status",message_status);
-    
-    if(message_status == 'delivered'){
-      const sms_sid=messageStatus?.sid;
+    console.log("message_status", message_status);
+
+    if (message_status == "delivered") {
+      const sms_sid = messageStatus?.sid;
       const callSocket = new WebSocket.Server({ noServer: true });
       callSocketServers[sms_sid] = callSocket;
       // wsUrl = `wss://${req.headers.host}/callStreaming?sms_sid=${sms_sid}`;
@@ -187,7 +204,9 @@ const fetch_sms_status = async (req, res) => {
       setSocket(sms_sid);
     }
 
-    res.status(200).json({ success: true, message: messageStatus,socket:wsUrl });
+    res
+      .status(200)
+      .json({ success: true, message: messageStatus, socket: wsUrl });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -202,10 +221,14 @@ const handle_incoming_sms = async (req, res) => {
   try {
     const { From, To, Body } = req.body;
     console.log(`\n\nMessage body: ${Body}`);
-    
+
+    latestMessageData = {
+      message: { From, To, Body },
+      timestamp: Date.now(),
+    };
+
     res.set("Content-Type", "text/xml");
     res.send(`<Response></Response>`);
-    // Broadcast the incoming SMS to connected WebSocket clients
     Object.values(callSocketServers)?.forEach((socketServer) => {
       socketServer?.clients?.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
@@ -225,7 +248,6 @@ const handle_incoming_sms = async (req, res) => {
   }
 };
 
-
 // const handle_incoming_sms = async (req, res) => {
 //   console.log("\n\n\nreq.bodyreq.bodyreq.bodyreq.bodyreq.body", req.body);
 //   try {
@@ -238,7 +260,6 @@ const handle_incoming_sms = async (req, res) => {
 //     res.send(`
 //         <Response></Response>
 //     `);
-
 
 //   } catch (error) {
 //     console.log("JSON.stringify(error)",JSON.stringify(error));
@@ -474,5 +495,5 @@ module.exports = {
   bridge_end,
   send_sms,
   fetch_sms_status,
-  handle_incoming_sms
+  handle_incoming_sms,
 };

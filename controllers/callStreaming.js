@@ -3,10 +3,10 @@ const { Voice } = require("@signalwire/realtime-api");
 const WebSocket = require("ws");
 let callSocketServers = {};
 let callResult = {};
-// let latestMessageData = {
-//   message: null,
-//   timestamp: null,
-// };
+let latestMessageData = {
+  message: null,
+  timestamp: null,
+};
 const axios = require("axios");
 const { response } = require("express");
 
@@ -156,18 +156,18 @@ const send_sms = async (req, res) => {
 function setSocket(sms_sid) {
   callSocketServers[sms_sid].on("connection", (ws) => {
     console.log("\n\n\nconnection has created now : ");
-    // const MESSAGE_EXPIRATION_TIME = 5000; // 5 seconds
-    // if (latestMessageData.message && latestMessageData.timestamp) {
-    //   const currentTime = Date.now();
-    //   if (
-    //     currentTime - latestMessageData.timestamp <=
-    //     MESSAGE_EXPIRATION_TIME
-    //   ) {
-    //     client.send(JSON.stringify(latestMessageData.message));
-    //   } else {
-    //     console.log("\n\nlatest time ", latestMessageData.timestamp);
-    //   }
-    // }
+    const MESSAGE_EXPIRATION_TIME = 6000; // 6 seconds
+    if (latestMessageData.message && latestMessageData.timestamp) {
+      const currentTime = Date.now();
+      if (
+        currentTime - latestMessageData.timestamp <=
+        MESSAGE_EXPIRATION_TIME
+      ) {
+        client.send(JSON.stringify(latestMessageData.message));
+      } else {
+        console.log("\n\nlatest time ", latestMessageData.timestamp);
+      }
+    }
 
     ws.on("message", async (message) => {
       const data = JSON.parse(message);
@@ -195,7 +195,7 @@ const fetch_sms_status = async (req, res) => {
     const message_status = messageStatus?.status?.toLowerCase();
     console.log("message_status", message_status);
 
-    if (message_status == "sent") {
+    if (message_status == "delivered") {
       const sms_sid = messageStatus?.sid;
       const callSocket = new WebSocket.Server({ noServer: true });
       callSocketServers[sms_sid] = callSocket;
@@ -220,10 +220,10 @@ const handle_incoming_sms = async (req, res) => {
     const { From, To, Body } = req.body;
     console.log(`\n\nMessage body: ${Body}`);
 
-    // latestMessageData = {
-    //   message: { From, To, Body },
-    //   timestamp: Date.now(),
-    // };
+    latestMessageData = {
+      message: { From, To, Body },
+      timestamp: Date.now(),
+    };
 
     res.set("Content-Type", "text/xml");
     res.send(`<Response></Response>`);

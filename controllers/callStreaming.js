@@ -163,7 +163,7 @@ function setSocket(sms_sid) {
         currentTime - latestMessageData.timestamp <=
         MESSAGE_EXPIRATION_TIME
       ) {
-        client.send(JSON.stringify(latestMessageData.message));
+        ws.send(JSON.stringify(latestMessageData.message));
       } else {
         console.log("\n\nlatest time ", latestMessageData.timestamp);
       }

@@ -14,8 +14,8 @@ const { RestClient } = require("@signalwire/node"); // Import SignalWire RestCli
 
 // Initialize the SignalWire client with your credentials
 const client = new RestClient(
-  "93d5b1c7-b843-49e8-be85-b9882c51524d",
-  "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
+  "16209236-4537-4170-aedb-77cbbd486d4b", // project id
+  "PT773f73b246754461d8985eeca4a75e7e2e4b92a5b874d49d", // api token
   {
     signalwireSpaceUrl: "myautogate.signalwire.com", // Replace with your SignalWire space URL
   }
@@ -155,7 +155,6 @@ const send_sms = async (req, res) => {
 
 function setSocket(sms_sid) {
   callSocketServers[sms_sid].on("connection", (ws) => {
-    console.log("\n\n\nconnection has created now : ");
     const MESSAGE_EXPIRATION_TIME = 6000; // 6 seconds
     if (latestMessageData.message && latestMessageData.timestamp) {
       const currentTime = Date.now();
@@ -163,9 +162,10 @@ function setSocket(sms_sid) {
         currentTime - latestMessageData.timestamp <=
         MESSAGE_EXPIRATION_TIME
       ) {
+        console.log("sending the latest message: ",);
         ws.send(JSON.stringify(latestMessageData.message));
       } else {
-        console.log("\n\nlatest time ", latestMessageData.timestamp);
+        console.log("\n\nlatest time ", new Date(latestMessageData.timestamp));
       }
     }
 
@@ -193,7 +193,6 @@ const fetch_sms_status = async (req, res) => {
     let wsUrl = "";
 
     const message_status = messageStatus?.status?.toLowerCase();
-    console.log("message_status", message_status);
 
     if (message_status == "delivered") {
       const sms_sid = messageStatus?.sid;
@@ -218,7 +217,7 @@ const fetch_sms_status = async (req, res) => {
 const handle_incoming_sms = async (req, res) => {
   try {
     const { From, To, Body } = req.body;
-    console.log(`\n\nMessage body: ${Body}`);
+    console.log(`\n\n\n\n\n\Message body: ${Body}`);
 
     latestMessageData = {
       message: { From, To, Body },

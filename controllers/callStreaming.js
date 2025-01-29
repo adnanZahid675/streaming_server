@@ -137,8 +137,22 @@ const checkDigits = (req, res) => {
 
 const send_sms = async (req, res) => {
   try {
-    const { from_number, to_number, message_body } = req.body;
-    const sendResult = await client.messages.create({
+    const { from_number, to_number, message_body,project_id,apiToken,space_url } = req.body; // getting project_id api_token from the user 
+    const myClient = new RestClient(
+      "16209236-4537-4170-aedb-77cbbd486d4b", // project id
+      "PT773f73b246754461d8985eeca4a75e7e2e4b92a5b874d49d", // api token
+      {
+        signalwireSpaceUrl: "myautogate.signalwire.com", // Replace with your SignalWire space URL
+      }
+    );
+    // const myClient = new RestClient(
+    //   project_id,
+    //   apiToken,
+    //   {
+    //     space_url:"myautogate.signalwire.com"
+    //   }
+    // );
+    const sendResult = await myClient.messages.create({
       from: from_number,
       to: to_number,
       body: message_body,
@@ -156,6 +170,9 @@ const send_sms = async (req, res) => {
 function setSocket(sms_sid) {
   callSocketServers[sms_sid].on("connection", (ws) => {
     const MESSAGE_EXPIRATION_TIME = 6000; // 6 seconds
+
+    console.log("latestMessageData.message && latestMessageData.timestamp",latestMessageData.message, latestMessageData.timestamp);
+    
     if (latestMessageData.message && latestMessageData.timestamp) {
       const currentTime = Date.now();
       if (

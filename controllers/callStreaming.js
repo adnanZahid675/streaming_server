@@ -137,21 +137,15 @@ const checkDigits = (req, res) => {
 
 const send_sms = async (req, res) => {
   try {
-    const { from_number, to_number, message_body,project_id,apiToken,space_url } = req.body; // getting project_id api_token from the user 
+    const { from_number, to_number, message_body,project_id,api_token,space_url } = req.body; // getting project_id api_token from the user     
+
     const myClient = new RestClient(
-      "16209236-4537-4170-aedb-77cbbd486d4b", // project id
-      "PT773f73b246754461d8985eeca4a75e7e2e4b92a5b874d49d", // api token
+      project_id,
+      api_token,
       {
-        signalwireSpaceUrl: "myautogate.signalwire.com", // Replace with your SignalWire space URL
+        signalwireSpaceUrl:space_url
       }
     );
-    // const myClient = new RestClient(
-    //   project_id,
-    //   apiToken,
-    //   {
-    //     space_url:"myautogate.signalwire.com"
-    //   }
-    // );
     const sendResult = await myClient.messages.create({
       from: from_number,
       to: to_number,
@@ -204,9 +198,17 @@ function setSocket(sms_sid) {
 }
 
 const fetch_sms_status = async (req, res) => {
-  const { message_sid } = req.body;
+  const { message_sid,project_id,api_token,space_url } = req.body;
+  const myClient = new RestClient(
+    project_id,
+    api_token,
+    {
+      signalwireSpaceUrl:space_url
+    }
+  );
+
   try {
-    const messageStatus = await client.messages(message_sid).fetch();
+    const messageStatus = await myClient.messages(message_sid).fetch();
     let wsUrl = "";
 
     const message_status = messageStatus?.status?.toLowerCase();
@@ -235,7 +237,6 @@ const handle_incoming_sms = async (req, res) => {
   try {
     const { From, To, Body } = req.body;
     console.log(`\n\n\n\n\n\Message body: ${Body}`);
-
     latestMessageData = {
       message: { From, To, Body },
       timestamp: Date.now(),

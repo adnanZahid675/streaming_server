@@ -2,15 +2,16 @@ const child_process = require("child_process");
 const WebSocket = require("ws");
 const { Transform } = require("stream");
 const { v4: uuidv4 } = require("uuid"); // Importing uuid
+const decryptData = require("./../utils/shared_func");
 
 let webSocketServers = {};
 
-function startFFmpeg(ws, ip, user, pass,uniqueId,port) {
+function startFFmpeg(ws,rtspURL) {
   const ffmpegArgs = [
     "-rtsp_transport",
     "tcp",
     "-i",
-    `rtsp://${user}:${pass}@${ip}:${port}`,
+    `${rtspURL}`,
     "-fflags",
     "nobuffer",
     "-rtbufsize",
@@ -18,7 +19,7 @@ function startFFmpeg(ws, ip, user, pass,uniqueId,port) {
     "-use_wallclock_as_timestamps",
     "1",
     "-s",
-    "540x360",
+    "540x318",
     "-fps_mode",
     "passthrough",
     "-copyts",
@@ -47,7 +48,6 @@ function startFFmpeg(ws, ip, user, pass,uniqueId,port) {
   });
 
   ffmpeg.on("exit", (code, signal) => {
-    console.log(`\n\n\n\n\n\n\n\nffmpeg exited with code ${code} and signal ${signal},state ${ws.readyState}`);
     if (ws.readyState === WebSocket.OPEN) {
       console.log("state ${ws.readyState} closing ", ws.readyState);
       ws.close();
@@ -66,16 +66,18 @@ function startFFmpeg(ws, ip, user, pass,uniqueId,port) {
 }
 
 const getStreaming = (req, res) => {
-  const { ip, user, pass,port } = req.query;
-  if (!ip || !user || !pass || !port) {
-    return res.status(400).send("Missing IP, user,port or pass");
-  }
-
-  try {
+  const { data } = req.body;
+  try {    
+    const { ip, user, pass, port } = decryptData(data)
+    if (!ip || !user || !pass || !port) {
+      return res.status(400).send("Missing IP, user,port or pass");
+    }
     const uniqueId = uuidv4();
     webSocketServers[uniqueId] = new WebSocket.Server({ noServer: true });
     webSocketServers[uniqueId].on("connection", (ws) => {
-      let ffmpeg = startFFmpeg(ws, ip, user, pass,uniqueId,port);
+      let rtsp_url=`rtsp://${user}:${pass}@${ip}:${port}`
+      
+      let ffmpeg = startFFmpeg(ws, rtsp_url);
       ws.on("close", () => {
         if (ffmpeg) {
           ffmpeg.kill("SIGINT");
@@ -83,14 +85,12 @@ const getStreaming = (req, res) => {
         }
       });
     });
-    //    = wsServer;
     const wsUrl = `ws://${req.headers.host}/record-list?id=${uniqueId}`;
-    res.json({ message: "WebSocket server created", url: wsUrl });
+    res.status(200).json({ message: "WebSocket server created", url: wsUrl });
   } catch (error) {
-    console.log("internal error : ",error);
+    console.log("internal error : ", error);
     res.status(500).json({ message: "Internal server error" });
-  }
-
+  }  
 };
 
 const closeAllSockets = (req, res) => {
@@ -103,6 +103,6 @@ const closeAllSockets = (req, res) => {
   });
   webSocketServers = {}; // Reset the server list
   res.json({ message: "All WebSocket connections closed" });
-};
+};  
 
 module.exports = { getStreaming, webSocketServers, closeAllSockets };

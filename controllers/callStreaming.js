@@ -1,151 +1,51 @@
-const { Voice } = require("@signalwire/realtime-api");
-
+const { callApi } = require("../utils/call_api");
 const WebSocket = require("ws");
 let callSocketServers = {};
-let callResult = {};
 let latestMessageData = {
   message: null,
   timestamp: null,
 };
 const axios = require("axios");
-const { response } = require("express");
+const decryptData = require("./../utils/shared_func");
+const {createACronJob} = require("./../utils/cron_jobs");
 
-const { RestClient } = require("@signalwire/node"); // Import SignalWire RestClient
+const { RestClient } = require("@signalwire/node");
 
-// Initialize the SignalWire client with your credentials
-const client = new RestClient(
-  "16209236-4537-4170-aedb-77cbbd486d4b", // project id
-  "PT773f73b246754461d8985eeca4a75e7e2e4b92a5b874d49d", // api token
-  {
-    signalwireSpaceUrl: "myautogate.signalwire.com", // Replace with your SignalWire space URL
-  }
-);
+const {
+  securityDate,
+  security2561,
+  security2,
+  security3,
+} = require("../utils/security_encryptions");
 
-const { SignalWire } = require("@signalwire/realtime-api");
 
-const dialAndAddToConference = async (req, res) => {
+const execute_schedule_task = async (req, res) => {
   try {
-    const { from, to } = req?.query;
-    if (!from || !to) {
-      res.status(400).json({ message: "Query params are not completed" });
-      return;
-    } else {
-      console.log("all query params from to \n", from, to);
-    }
-    res.status(200).json({ message: "Processing request" });
-    const dialedCall = await consumer.client.calling.dial({
-      type: "phone",
-      to: `+${to}`, // Replace with the destination number
-      from: `+${from}`, // Replace with your SignalWire number
-    });
-    console.log("dialed call ", dialedCall);
+    const { data,action,dateTime,time_ahead} = req.body;
+    console.log("\n\n\ndateTime",dateTime);
+    console.log("\n\n\ntimeAhead",time_ahead);
+    createACronJob(dateTime,data,time_ahead);
+    
+    res.status(200).json({ success: true, message: data });
   } catch (error) {
-    console.error("Error making the call:", error);
+    res.status(500).json({
+      success: false,
+      message: JSON.stringify(error),
+      error_message: error?.message,
+    });
   }
-};
-request = 0;
-
-const getConferenceStreaming = async (req, res) => {
-  console.log("\n\nrequest call log", request++);
-  console.log("req?.body", req?.body);
-  // console.log("\n\n\ncomplete req", req);
-  console.log("\n\n\n\n\n\n\n");
-
-  const { from, to, url, call_id } = req?.body;
-  if (!from || !to || !url || !call_id) {
-    res.status(400).json({
-      message: `${!from ? "From number is required" : " "} ${
-        !to ? "to number is required" : ""
-      }${!url ? "Call sid is required" : ""}
-          `,
-    });
-    return;
-  } else {
-    console.log("\nall querry params from to \n", from, to, url);
-  }
-
-  const client = new Voice.Client({
-    project: "93d5b1c7-b843-49e8-be85-b9882c51524d",
-    token: "PT4506a1c72f4ce75305b634a5ef11ca40e636fd0d9837f094",
-    topics: ["office"],
-  });
-  res.status(200).json({ message: "Processing your request" });
-  try {
-    const call = await client.dialPhone({
-      from: `${from}`,
-      to: `${to}`,
-    });
-
-    console.log("call", call);
-    console.log("call voptions", call?.options?.payload?.call_id);
-
-    if (call?.options?.payload?.call_id) {
-      sendPostRequestWithOnCall(url, call_id);
-    }
-    call.on("call.state", (newState) => {
-      if (newState === "ended") {
-        console.log("Call has ended.");
-      }
-    });
-
-    let collectDigits = await call.collect({
-      digits: {
-        max: 10,
-        digitTimeout: 3,
-        terminators: "#*",
-      },
-    });
-
-    call.on("collect.started", (collect) => {
-      console.log("\n\n\ncollect.started", collect, "\n\n\n");
-    });
-    call.on("collect.startOfInput", (collect) => {
-      console.log("\n\n\nInput collection started.");
-    });
-    call.on("collect.updated", (collect) => {
-      console.log("\n\n\ncollect.updated", collect.digits);
-    });
-    call.on("collect.ended", async (collect) => {
-      console.log("\n\n\ncollect.ended", collect.digits);
-      await call.playTTS({
-        text: "Please enter the number ",
-      });
-      collectDigits = await call.collect({
-        digits: {
-          max: 10,
-          digitTimeout: 3,
-          terminators: "#*",
-        },
-      });
-    });
-    call.on("collect.failed", (collect) => {
-      console.log("\n\n\ncollect.failed", collect.reason);
-    });
-  } catch (error) {
-    console.log("\n\n\n\ngot error in catch section ", error, "\n\n\n\n\n\n");
-  }
-};
-
-const checkDigits = (req, res) => {
-  const { requestId } = req.query;
-  if (!requestId || !callResult[requestId]) {
-    res.status(404).json({ message: "Digits not available yet" });
-    return;
-  }
-  res.status(200).json({ digits: callResult[requestId] });
 };
 
 const send_sms = async (req, res) => {
   try {
-    const { from_number, to_number, message_body,project_id,api_token,space_url } = req.body; // getting project_id api_token from the user     
-
-    const myClient = new RestClient(
-      project_id,
-      api_token,
-      {
-        signalwireSpaceUrl:space_url
-      }
-    );
+    const { data } = req.body;
+    const { from_number, to_number, message_body, project_id ,api_token,space_url} = decryptData(data)
+    if (!from_number || !to_number ||!message_body || !project_id) {
+      return res.status(400).send("Missing from_number, to_number,message_body or project_id");
+    }
+    const myClient = new RestClient(project_id, api_token, {
+      signalwireSpaceUrl: space_url,
+    });
     const sendResult = await myClient.messages.create({
       from: from_number,
       to: to_number,
@@ -160,20 +60,23 @@ const send_sms = async (req, res) => {
     });
   }
 };
-
 function setSocket(sms_sid) {
   callSocketServers[sms_sid].on("connection", (ws) => {
     const MESSAGE_EXPIRATION_TIME = 6000; // 6 seconds
 
-    console.log("latestMessageData.message && latestMessageData.timestamp",latestMessageData.message, latestMessageData.timestamp);
-    
+    console.log(
+      "latestMessageData.message && latestMessageData.timestamp",
+      latestMessageData.message,
+      latestMessageData.timestamp
+    );
+
     if (latestMessageData.message && latestMessageData.timestamp) {
       const currentTime = Date.now();
       if (
         currentTime - latestMessageData.timestamp <=
         MESSAGE_EXPIRATION_TIME
       ) {
-        console.log("sending the latest message: ",);
+        console.log("sending the latest message: ");
         ws.send(JSON.stringify(latestMessageData.message));
       } else {
         console.log("\n\nlatest time ", new Date(latestMessageData.timestamp));
@@ -198,14 +101,17 @@ function setSocket(sms_sid) {
 }
 
 const fetch_sms_status = async (req, res) => {
-  const { message_sid,project_id,api_token,space_url } = req.body;
-  const myClient = new RestClient(
-    project_id,
-    api_token,
-    {
-      signalwireSpaceUrl:space_url
-    }
-  );
+  const { data } = req.body;
+  const { message_sid, project_id, api_token, space_url } = decryptData(data);
+  if (!message_sid || !project_id || !api_token || !space_url) {
+    return res
+      .status(400)
+      .send("Missing space_url, api_token,project_id or message_sid");
+  }
+
+  const myClient = new RestClient(project_id, api_token, {
+    signalwireSpaceUrl: space_url,
+  });
 
   try {
     const messageStatus = await myClient.messages(message_sid).fetch();
@@ -253,6 +159,116 @@ const handle_incoming_sms = async (req, res) => {
     });
 
     // Respond with a LaML response (required for SignalWire)
+  } catch (error) {
+    console.error("Error handling incoming SMS:", JSON.stringify(error));
+    res.status(500).json({
+      success: false,
+      error_message: error?.message,
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+const getPlaybackRecords = async (req, res) => {
+  try {
+    const username = "admin";
+    const password = "AutoGate!!";
+
+    const login_data = await login(username, password);
+
+    const iv = "7CF38B23DC7ED371";
+
+    const userToken = encodeURIComponent(
+      JSON.stringify({
+        loginName: username,
+        encryptionType: login_data?.encryptionType,
+        datetime: login_data?.date,
+        iv,
+      })
+    );
+
+    const cookieHeader = `updateTips=true; previewRes=1; previewStream=1; modifypsw=true; userName=${username}; cookie=${encodeURIComponent(
+      JSON.stringify(login_data?.response?.data)
+    )}; ${
+      login_data?.response?.data?.cookie
+    }; userToken=${userToken}; default_streamtype=false`;
+
+    let payload={
+      action: "get",
+      data: {
+        fileType: req.body.fileType,
+        startTime: req.body.startTime,
+        endTime: req.body.endTime,
+      },
+    }
+    console.log("payload",payload)
+    const record = await callApi(
+      "http://70.163.3.136:5555/api/record/record-list",
+      "POST",
+      payload,
+      {
+        "Content-Type": "application/json",
+        Cookie: cookieHeader,
+      }
+    );
+    res.status(200).json({
+      success: true,
+      login_data,
+      Cookie: login_data?.response?.data,
+      response: record?.data,
+    });
+  } catch (error) {
+    console.error("Error in getPlaybackRecords:", error.message || error);
+    res.status(500).json({
+      success: false,
+      error_message: error.message || "An unknown error occurred",
+      error: error,
+    });
+  }
+};
+
+const getRecordFileInfo = async (req, res) => {
+  try {
+    const {Cookie,fileType,startTime} = req.body;
+    console.log("cookies: ",Cookie);
+
+    const login_data=JSON.stringify(Cookie);
+    console.log("login_data",login_data);
+    
+    const userToken = encodeURIComponent(
+      JSON.stringify({
+        loginName: username,
+        encryptionType: login_data.encryptionType,
+        datetime: login_data.date,
+        iv,
+      })
+    );
+    
+    // Encode the cookie object (it will encode the entire JSON)
+    const encodedCookie = encodeURIComponent(JSON.stringify(login_data.response.data));
+
+    const response = await axios.post(
+      "http://70.163.3.136:5555/api/record/record-encode-info",
+      {
+        action: "get",
+        data: {
+          fileType: fileType,
+          startTime: startTime,
+        },
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: encodedCookie,
+        },
+        withCredentials: true,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      response: response.data,
+    });
   } catch (error) {
     console.error("Error handling incoming SMS:", JSON.stringify(error));
     res.status(500).json({
@@ -321,169 +337,82 @@ async function sendDTMFEvent(digit, call_id, dtmf_url) {
   }
 }
 
-async function create_call_app(conf_id) {
-  console.log("creating call app", conf_id);
+const login = async (username, password) => {
   try {
-    const call = await client.calls.create({
-      from: "+18016506700", // Your SignalWire number
-      to: "sip:myautogate-conference.dapp.signalwire.com",
-      twiml: `
-        <Response>
-          <Dial>
-            <Conference>MyConference_${conf_id}</Conference>
-          </Dial>
-        </Response>
-      `,
-    });
-    console.log("Call created:", call.sid);
-  } catch (error) {
-    console.error("Error creating call:", error);
-  }
-}
+    const sessionResult = await callApi(
+      "http://70.163.3.136:5555/api/session/login-capabilities",
+      "POST",
+      { action: "get", data: { username } },
+      { "Content-Type": "application/json" }
+    );
 
-const process_authorization = (req, res) => {
-  console.log("\n\n\n\n\nreq?.query?".req?.query);
-  const conf_id = req?.query?.conf_id;
-  res.send(
-    `
-    <?xml version="1.0" encoding="UTF-8"?>
-    <Response>
-      <Dial>
-        <Conference>Room1234</Conference>
-      </Dial>
-    </Response>
-  `
-  );
-};
+    console.log("sessionResult",sessionResult?.data);
+    
 
-async function sendPostRequestWithOnCall(url, call_id) {
-  try {
-    let payload = {
-      call_id,
+    if (!sessionResult?.data?.data?.sessionID) {
+      throw new Error("Session ID not received from login-capabilities API");
+    }
+
+    const sessionID = sessionResult.data.data.sessionID;
+    const salt = sessionResult.data.data.param?.salt || "";
+    const challenge = sessionResult.data.data.param?.challenge || "";
+    const enableIteration =
+      sessionResult.data.data.param?.enableIteration || false;
+    const iterations = sessionResult.data.data.param?.iterations || 1;
+
+    const e = securityDate();
+
+    let hashedPassword = security2561(username, salt, e[0], password);
+    hashedPassword = security2(hashedPassword, challenge);
+    if (enableIteration) {
+      hashedPassword = security3(iterations, hashedPassword);
+    }
+
+    // Step 3: Send Login Request
+    const finalPayload = {
+      action: "set",
+      data: {
+        username,
+        loginEncryptionType: "sha256-1",
+        password: hashedPassword,
+        sessionID,
+        datetime: e[1],
+      },
     };
-    const response = await axios.get(url, payload);
+
+    const loginHeaders = {
+      "Content-Type": "application/json",
+      Cookie: `sessionID=${sessionID}; updateTips=true; default_streamtype=true; userName=admin; modifypsw=true; cookie={"cookie":"sessionID=${sessionID}"}; sessionID=${sessionID}`,
+    };
+
+    const loginResult = await callApi(
+      "http://70.163.3.136:5555/api/session/login",
+      "POST",
+      finalPayload,
+      loginHeaders
+    );
+    return {
+      success: true,
+      sessionID,
+      encryptionType: sessionResult.data.data.encryptionType[0],
+      date: e[1],
+      response: loginResult.data,
+    };
   } catch (error) {
-    console.error("Error sending axios POST request:", error);
+    console.error("Login error:", error.message);
+    return {
+      success: false,
+      error_message: error.message || "Login attempt unsuccessful.",
+    };
   }
-}
-
-// calling function is starting from here on
-
-const initialGreetings = async (req, res) => {
-  const responseXML = `
-          <Response>
-            <Say> Hello, please press 1 if you want to continue the call. </Say>
-            <Gather numDigits="1" action='https://callstream-6b64fe9b1f4d.herokuapp.com/api/call_to_owner' method='POST' timeout='10'/>
-          </Response>`;
-
-  res.send(responseXML);
-};
-
-const calling_to_owner = async (req, res) => {
-  const digit = req.body.Digits;
-  console.log("digits from guest", digit);
-
-  from = "+12019716175"; // signal wire
-  to = "+18334356935"; // owner number
-
-  if (digit == "1") {
-    console.log("going to create a bridge between guest and owner");
-
-    const responseXML = `
-     <Response>
-        <Say>Connecting you to Person B now.</Say>
-        <Dial callerId="${from}" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/bridge_end" hangupOnStar="false" endOnBridge="false">
-          <Number statusCallbackEvent="answered" statusCallback="https://callstream-6b64fe9b1f4d.herokuapp.com/api/status_call_back">${to}</Number>
-        </Dial>
-      </Response>`;
-
-    console.log("calling initiated");
-    res.set("Content-Type", "text/xml");
-    res.send(responseXML); // This will bridge Person A and Person B
-  } else {
-    res.send("<Response><Say>Invalid input. Goodbye.</Say></Response>");
-  }
-};
-
-const connect_call = (req, res) => {
-  // Respond with LaML to dial Person B and bridge the call
-  console.log("\n\n\n\n\nis it comming here ");
-  // dialing owner number
-  res.send(`
-    <Response>
-      <Say>Dialing now. Please wait</Say>
-      <Dial>
-        <Number>+18334356935</Number>
-      </Dial>
-    </Response>
-  `);
-};
-
-const bridge_end = async (req, res) => {
-  const callStatus = req.body.DialCallStatus;
-  const from = req.body.From; // Person A
-  const to = req.body.To; // Person B
-
-  console.log("\n\n\n\nreq.body", req.body);
-
-  console.log(
-    "Bridge ended. Call status:",
-    callStatus,
-    "From:",
-    from,
-    "To:",
-    to
-  );
-
-  if (callStatus === "completed" && to === "+18334356935") {
-    // Ensure this is for Person B
-    // Send a prompt to Person B for authorization
-    const responseXML = `
-      <?xml version="1.0" encoding="UTF-8"?>
-      <Response>
-        <Say>Thank you for the call. Please authorize Person A by pressing 1.</Say>
-        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/authorization" method="POST" timeout="10"/>
-      </Response>
-    `;
-
-    console.log("Prompting Person B for authorization");
-
-    res.set("Content-Type", "text/xml");
-    res.send(responseXML); // Ask Person B for authorization
-  } else {
-    res.send(` <Response>
-        <Say>else part else part press 1 else part else partelse part else partelse part else partelse part else part</Say>
-        <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST" timeout="10"/>
-      </Response>`);
-  }
-};
-
-const status_call_back = (req, res) => {
-  // Respond with LaML to dial Person B and bridge the call
-  console.log("\n\n\n\n\nstatus_call_back ended ", req.body);
-  res.send(`
-    <Response>
-      <Say>In the status call back To authorize Person A please press 1.</Say>
-      <Gather numDigits="1" action="https://callstream-6b64fe9b1f4d.herokuapp.com/api/process_authorization" method="POST"/>
-    </Response>
-  `);
 };
 
 module.exports = {
   getCallStreaming,
-  callSocketServers,
-  checkDigits,
-  getConferenceStreaming,
-  dialAndAddToConference,
-
-  // calling_to_owner
-  calling_to_owner,
-  connect_call,
-  status_call_back,
-  process_authorization,
-  initialGreetings,
-  bridge_end,
   send_sms,
   fetch_sms_status,
   handle_incoming_sms,
+  getPlaybackRecords,
+  getRecordFileInfo,
+  execute_schedule_task
 };
